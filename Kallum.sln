@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kallum", "Kallum.csproj", "{FCE17B1A-A548-4E53-8BE1-93748DCF5241}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCE17B1A-A548-4E53-8BE1-93748DCF5241}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCE17B1A-A548-4E53-8BE1-93748DCF5241}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCE17B1A-A548-4E53-8BE1-93748DCF5241}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCE17B1A-A548-4E53-8BE1-93748DCF5241}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {65E2F8BC-4EC5-4D85-92CF-091D30B40818}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,7 @@
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\obj\Debug\net8.0\Kallum.csproj.AssemblyReference.cache
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\obj\Debug\net8.0\Kallum.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\obj\Debug\net8.0\Kallum.AssemblyInfoInputs.cache
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\obj\Debug\net8.0\Kallum.AssemblyInfo.cs
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\obj\Debug\net8.0\Kallum.csproj.CoreCompileInputs.cache
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\obj\Debug\net8.0\Kallum.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\obj\Debug\net8.0\Kallum.MvcApplicationPartsAssemblyInfo.cache

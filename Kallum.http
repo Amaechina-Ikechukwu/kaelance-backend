@@ -1,0 +1,6 @@
+@Kallum_HostAddress = http://localhost:5107
+
+GET {{Kallum_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
