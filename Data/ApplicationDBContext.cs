@@ -5,10 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kallum.Data
 {
-    public class ApplicationDBContext:IdentityDbContext<AppUser>
+    public class ApplicationDBContext : IdentityDbContext<AppUser>
     {
-        public ApplicationDBContext (DbContextOptions dbContextOptions):base(dbContextOptions) { 
-        
+        public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
+        {
+
         }
         //will add dbset for models later
         public DbSet<UserAccount> UserAccountsData { get; set; }
@@ -16,13 +17,23 @@ namespace Kallum.Data
         public DbSet<UserBankAccountInformation> UserBankAccountInformationData { get; set; }
         public DbSet<TransactionHistory> TransactionHistoriesData { get; set; }
         public DbSet<BalanceDetails> BalanceDetailsData { get; set; }
+        public DbSet<KallumLock> KallumLockData { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             //will add foreign keys later
-            List<IdentityRole> roles = new List<IdentityRole> {new  IdentityRole{
+            builder.Entity<UserAccount>()
+                       .HasOne(b => b.BankAccount);
+            builder.Entity<UserAccount>()
+                       .HasOne(b => b.BalanceDetails);
+
+
+
+            //
+            List<IdentityRole> roles = new List<IdentityRole> {
+                new  IdentityRole{
                 Name="Admin",
                 NormalizedName="ADMIN"
                 },
@@ -34,6 +45,7 @@ namespace Kallum.Data
             };
             builder.Entity<IdentityRole>().HasData(roles);
 
-           
+
         }
+    }
 }

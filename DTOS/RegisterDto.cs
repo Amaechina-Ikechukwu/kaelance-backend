@@ -13,7 +13,6 @@ namespace Kallum.DTOS
         [Required]
         public string? PassWord { get; set; }
         [Required]
-        [Phone]
         public string? PhoneNumber { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using Kallum.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace kallum.Controllers
 {
     [ApiController]
@@ -12,21 +13,51 @@ namespace kallum.Controllers
 
     public class AuthenticationController : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly ITokenService _tokenService;
-        private readonly SignInManager<AppUser> _signManager;
+        private readonly IRegisterRepository _registerRepository;
 
-        public AuthenticationController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager)
+        public AuthenticationController(IRegisterRepository registerRepository)
         {
-            _userManager = userManager;
-            _tokenService = tokenService;
-            _signManager = signInManager;
+
+            _registerRepository = registerRepository;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerData)
         {
-            throw new NotImplementedException();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            try
+            { 
+                var registerResult = await _registerRepository.RegisterUserAsync(registerData);
+               
+                if (registerResult != null)
+                {
+                    return Ok(
+                        registerResult
+                    );
+                }
+                else
+                {
+                    return BadRequest("Could not create User");
+                }
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+        }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody]LoginDto loginData)
+        {
+        try    {if (!ModelState.IsValid) return BadRequest(ModelState);
+            var loginResult = await _registerRepository.LoginUserAsync(loginData);
+            if (loginResult == null) return BadRequest("Username is incorrect");
+                return Ok(loginResult);
+            }catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
     }
