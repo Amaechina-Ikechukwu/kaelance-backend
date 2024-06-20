@@ -4,3 +4,5 @@ appsettings
 Kallum.csproj
 Kallum.csproj.user
 Kallum.http
+Migrations
+Kallum*
