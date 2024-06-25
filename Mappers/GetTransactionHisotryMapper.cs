@@ -20,6 +20,7 @@ namespace Kallum.Mappers
                 Sender = transactionHistoryDto.Sender,
                 TransactionDescription = transactionHistoryDto.TransactionDescription,
                 TransactionHistoryId = transactionHistoryDto.TransactionHistoryId,
+                TransationType = transactionHistoryDto.TransationType
 
             };
         }

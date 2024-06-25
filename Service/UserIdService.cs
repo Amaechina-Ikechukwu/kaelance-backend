@@ -31,16 +31,26 @@ namespace Kallum.Service
 
             return userInfo.Id;
         }
+        public async Task<AppUser> GetUserFullInformation(string username)
+        {
+            var userInfo = await _userManager.FindByNameAsync(username);
+            if (userInfo == null)
+            {
+                throw new KeyNotFoundException($"User with username '{username}' not found.");
+            }
+
+            return userInfo;
+        }
 
         public async Task<string> GetBankAccountNumber(string userId)
         {
-            var accountInfo = await _context.BankAccountsData.FirstOrDefaultAsync(user => user.UserAccountId == userId);
+            var accountInfo = await _context.BankAccountsData.FirstOrDefaultAsync(user => user.AppUser.Id == userId);
             return accountInfo.BankAccountId;
         }
-        public async Task<BankAccountDto> GetBankAccountInfo(string bankAccountId)
+        public async Task<BankAccountDto?> GetBankAccountInfo(string bankAccountId)
         {
             var accountInfo = await _context.BankAccountsData.FirstOrDefaultAsync(user => user.BankAccountId == bankAccountId);
-            return accountInfo.ToBankAccountDto();
+            return accountInfo?.ToBankAccountDto();
         }
     }
 }

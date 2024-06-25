@@ -10,9 +10,8 @@ namespace Kallum.Interfaces
 {
     public interface IBankOperationRepository
     {
-        Task<BankAccountDto> CreateBankAccount(string userId);
-        Task<BalanceDetails> GetBalanceDetails(string username);
-        Task<KallumLockDto> GetKallumLockStatus(string username);
-        Task<string> SetKallumLock(string username, KallumLockDto lockDetails);
+        Task<BankAccountDto?> CreateBankAccount(string userId);
+        Task<BalanceDetails?> GetBalanceDetails(string username);
+        Task<BankAccountDto?> GetBankAccountAsync(string bankId);
     }
 }

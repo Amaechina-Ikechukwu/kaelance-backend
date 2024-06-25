@@ -6,12 +6,12 @@ namespace Kallum.DTOS
     {
         [Required]
 
-        public string? FullName { get; set; }
+        public required string FullName { get; set; }
         [Required]
         [EmailAddress]
-        public string? Email { get; set; }
+        public required string Email { get; set; }
         [Required]
-        public string? PassWord { get; set; }
+        public required string PassWord { get; set; }
         [Required]
         public string? PhoneNumber { get; set; }
     }

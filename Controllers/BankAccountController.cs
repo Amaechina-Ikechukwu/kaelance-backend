@@ -36,7 +36,7 @@ namespace Kallum.Controllers
             {
                 var username = User.GetUsername();
                 var userInfo = await _userManager.FindByNameAsync(username);
-                var userId = userInfo.Id;
+                var userId = userInfo?.Id;
                 if (userId == null) return BadRequest("User not found");
 
                 var bankDetails = await _bankRepository.CreateBankAccount(userId);
@@ -68,43 +68,26 @@ namespace Kallum.Controllers
                 return StatusCode(500, e);
             }
         }
-        [HttpGet("lockcomplete")]
+        [HttpGet("accountdetails/{bankid}")]
         [Authorize]
-        public async Task<IActionResult> CheckIFLockIsSet()
+        public async Task<IActionResult> GetAccountDetail([FromRoute] string bankid)
         {
             try
             {
-                var username = User.GetUsername();
-                var kallumLockStatus = await _bankRepository.GetKallumLockStatus(username);
-                if (kallumLockStatus is null)
+
+                var bankDetailsResult = await _bankRepository.GetBankAccountAsync(bankid);
+                if (bankDetailsResult is null)
                 {
-                    return BadRequest();
+                    return NotFound(new { message = "Bank account not found." });
                 }
-                return Ok(kallumLockStatus);
+                return Ok(bankDetailsResult);
             }
             catch (Exception e)
             {
-                return StatusCode(500, e);
+                // Log the exception (not shown here for brevity)
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = e.Message });
             }
         }
-        [HttpPost("kallumlock")]
-        [Authorize]
-        public async Task<IActionResult> SetKallumLock(KallumLockDto lockdetails)
-        {
-            try
-            {
-                var username = User.GetUsername();
-                var kallumLockStatus = await _bankRepository.SetKallumLock(username, lockdetails);
-                if (kallumLockStatus is null)
-                {
-                    return BadRequest();
-                }
-                return Ok(kallumLockStatus);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e);
-            }
-        }
+
     }
 }

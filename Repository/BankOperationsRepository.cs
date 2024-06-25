@@ -36,7 +36,7 @@ namespace Kallum.Service
             return accountNumber;
         }
 
-        public async Task<BankAccountDto> CreateBankAccount(string userId)
+        public async Task<BankAccountDto?> CreateBankAccount(string userId)
         {
             try
             {
@@ -45,30 +45,33 @@ namespace Kallum.Service
                 {
                     AccountType = "Savings",
                     BankAccountId = generatedAccountNumber,
-                    CreatedDate = DateTime.Now,
-                    UserAccountId = userId,
-                    Status = "Active"
-
-
+                    CreatedDate = DateTime.UtcNow,
+                    Status = "Active",
+                    AppUserId = userId,
+                    Id = "kallum-" + Guid.NewGuid()
                 };
-                var userBankAccountAlreadyExists = await _context.BankAccountsData.AnyAsync(user => user.UserAccountId == userId);
+
+                var userBankAccountAlreadyExists = await _context.BankAccountsData.AnyAsync(user => user.AppUserId == userId);
                 if (userBankAccountAlreadyExists)
                 {
-                    var userBankAccountInfo = await _context.BankAccountsData.FirstOrDefaultAsync(user => user.UserAccountId == userId);
+                    var userBankAccountInfo = await _context.BankAccountsData
+                        .Where(user => user.AppUserId == userId)
+                        .Select(user => user.ToBankAccountDto())
+                        .FirstOrDefaultAsync();
 
-                    return userBankAccountInfo.ToBankAccountDto();
-
+                    return userBankAccountInfo;
                 }
+
                 await _context.BankAccountsData.AddAsync(bankDetails);
                 await _context.SaveChangesAsync();
+
                 var bankDetailsDto = new BankAccountDto
                 {
-                    AccountType = "Savings",
                     BankAccountId = generatedAccountNumber,
-                    CreatedDate = DateTime.Now,
-                    Status = "Active"
-
+                    Status = "Active",
+                    KallumUser = null // Assuming there is no AppUser information for new accounts
                 };
+
                 return bankDetailsDto;
             }
             catch (Exception e)
@@ -77,12 +80,34 @@ namespace Kallum.Service
             }
         }
 
-        public async Task<BalanceDetails> GetBalanceDetails(string username)
+        public async Task<BalanceDetails?> GetBalanceDetails(string username)
         {
             try
             {
                 var userId = await _userIdService.GetUserId(username);
-                var bankDetailsData = await _context.BalanceDetailsData.Include(account => account.BankAccountDetails).FirstOrDefaultAsync(details => details.BankAccountDetails.UserAccountId == userId);
+                var bankDetailsData = await _context.BalanceDetailsData
+                .Where(ba => ba.BankAccountDetails.AppUserId == userId)
+                .Select(ba => new BalanceDetails
+                {
+                    Currency = ba.Currency,
+                    CurrencySymbol = ba.CurrencySymbol,
+                    CurrentBalance = ba.CurrentBalance ?? 0.0m,
+                    Id = ba.Id
+
+                })
+                .FirstOrDefaultAsync();
+
+                if (bankDetailsData is null)
+                {
+                    return new BalanceDetails
+                    {
+                        Currency = "#",
+                        CurrencySymbol = "#",
+                        CurrentBalance = 0.0m,
+                        Id = 0
+
+                    };
+                }
                 return bankDetailsData;
             }
             catch (Exception e)
@@ -96,40 +121,26 @@ namespace Kallum.Service
 
         }
 
-        public async Task<KallumLockDto> GetKallumLockStatus(string username)
+        public async Task<BankAccountDto?> GetBankAccountAsync(string bankid)
         {
-            try
-            {
-                var userId = await _userIdService.GetUserId(username);
-                var KallumLock = await _context.KallumLockData.FirstOrDefaultAsync(details => details.UserAccountId == userId);
-                return KallumLock.ToKallumLockDto();
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.ToString());
-            }
-        }
-
-        public async Task<string> SetKallumLock(string username, KallumLockDto lockdetails)
-        {
-            try
-            {
-                var userId = await _userIdService.GetUserId(username);
-                var kallumLock = new KallumLock
+            return await _context.BankAccountsData
+                .Where(ba => ba.BankAccountId == bankid)
+                .Select(ba => new BankAccountDto
                 {
-                    SecurePin = lockdetails.SecurePin,
-                    TransactionPin = lockdetails.TransactionPin,
-                    UserAccountId = userId
-                };
+                    BankAccountId = ba.BankAccountId,
+                    Status = ba.Status,
+                    AccountType = ba.AccountType,
+                    KallumUser = new AppUserDto
+                    {
 
-                await _context.KallumLockData.AddAsync(kallumLock);
-                await _context.SaveChangesAsync();
-                return "Done";
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.ToString());
-            }
+                        Email = ba.AppUser.Email,
+                        UserName = ba.AppUser.UserName
+                    }
+                })
+                .FirstOrDefaultAsync();
         }
+
+
+
     }
 }

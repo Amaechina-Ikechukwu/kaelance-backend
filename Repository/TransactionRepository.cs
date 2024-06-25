@@ -29,7 +29,7 @@ namespace Kallum.Repository
                 var transaction = new TransactionHistory
                 {
                     Amount = amount,
-                    Date = DateTime.Now,
+                    Date = DateTime.UtcNow,
                     RecieverId = reciever,
                     SenderId = "Oversight",
                     TransactionDescription = "Initialization of the Kallum Economy",
@@ -66,7 +66,7 @@ namespace Kallum.Repository
                 {
                     BankAccountDetails = accountBalanceInfo,
                     CurrentBalance = amount,
-                    LastUpdated = DateTime.Now,
+                    LastUpdated = DateTime.UtcNow,
                     Currency = "Naira",
                     CurrencySymbol = "#"
                 };
@@ -77,7 +77,7 @@ namespace Kallum.Repository
             else
             {
                 balanceInfo.CurrentBalance += amount;
-                balanceInfo.LastUpdated = DateTime.Now;
+                balanceInfo.LastUpdated = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
                 return balanceInfo;
             }
@@ -89,7 +89,7 @@ namespace Kallum.Repository
             try
             {
                 var userId = await _userIdService.GetUserId(username);
-                var senderInfo = await _context.BankAccountsData.FirstOrDefaultAsync(account => account.UserAccountId == userId);
+                var senderInfo = await _context.BankAccountsData.FirstOrDefaultAsync(account => account.AppUser.Id == userId);
 
                 transactionDto.SenderId = senderInfo.BankAccountId;
 
@@ -104,11 +104,15 @@ namespace Kallum.Repository
                 throw new Exception(e.ToString());
             }
         }
-        public async Task<BalanceDetails> DeductSendersBalance(string senderId, decimal amount)
+        public async Task<BalanceDetails?> DeductSendersBalance(string senderId, decimal amount)
         {
             var balanceInfo = await _context.BalanceDetailsData.FirstOrDefaultAsync(balance => balance.BankAccountDetails.BankAccountId == senderId);
+            if (balanceInfo is null)
+            {
+                return null;
+            }
             balanceInfo.CurrentBalance = balanceInfo.CurrentBalance - amount;
-            balanceInfo.LastUpdated = DateTime.Now;
+            balanceInfo.LastUpdated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return balanceInfo;
         }
@@ -117,7 +121,7 @@ namespace Kallum.Repository
             var transaction = new TransactionHistory
             {
                 Amount = transactionDto.Amount,
-                Date = DateTime.Now,
+                Date = DateTime.UtcNow,
                 RecieverId = transactionDto.RecieverId,
                 SenderId = transactionDto.SenderId,
                 TransactionDescription = transactionDto.TransactionDescription,
@@ -133,20 +137,24 @@ namespace Kallum.Repository
             await _context.SaveChangesAsync();
             return transaction;
         }
-        public async Task<List<TransactionHistoryDto>> GetTransactionHistory(string username)
+        public async Task<List<TransactionHistoryDto>?> GetTransactionHistory(string username)
         {
             var userId = await _userIdService.GetUserId(username);
             var userBankAccountId = await _userIdService.GetBankAccountNumber(userId);
             var transactionInformation = await _context.TransactionHistoriesData
                 .Where(transactions => transactions.RecieverId == userBankAccountId || transactions.SenderId == userBankAccountId)
                 .ToListAsync();
+            if (transactionInformation is null)
+            {
+                return null;
+            }
 
             var completeTransactionInformation = new List<TransactionHistoryDto>();
 
             foreach (var transaction in transactionInformation)
             {
-                var receiverInfoTask = await _userIdService.GetBankAccountInfo(transaction.RecieverId);
-                var senderInfoTask = await _userIdService.GetBankAccountInfo(transaction.SenderId);
+                var receiverInfoTask = await _userIdService.GetBankAccountInfo(transaction.RecieverId) ?? null;
+                var senderInfoTask = await _userIdService.GetBankAccountInfo(transaction.SenderId) ?? null;
 
 
 

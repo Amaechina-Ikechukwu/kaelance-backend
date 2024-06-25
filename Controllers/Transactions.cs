@@ -60,15 +60,33 @@ namespace Kallum.Controllers
 
         [HttpGet("transactions")]
         [Authorize]
-        public async Task<IActionResult>  GetTransactionHistory(){
-try{
-    var username = User.GetUsername();
+        public async Task<IActionResult> GetTransactionHistory()
+        {
+            try
+            {
+                var username = User.GetUsername();
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username is null or empty.");
+                }
+
                 var transactionResult = await _transactionRepository.GetTransactionHistory(username);
+
+                if (transactionResult == null)
+                {
+                    // Log the issue for further diagnosis
+                    return NotFound("No transaction history found.");
+                }
+
                 return Ok(transactionResult);
-}catch(Exception e){
-                return StatusCode(500, e);
-}
+            }
+            catch (Exception e)
+            {
+                // Log the exception for further diagnosis
+                return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
+            }
         }
+
 
     }
 }

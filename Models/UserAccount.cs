@@ -2,12 +2,10 @@
 {
     public class UserAccount
     {
-        public int Id { get; set; }
-        public string FullName { get; set; }
-        public string Email { get; set; }
-        public string PassWord { get; set; }
-        public string PhoneNumber { get; set; }
-        public BankAccount BankAccount { get; set; }
-        public BalanceDetails BalanceDetails { get; set; }
+        public string Id { get; set; }
+        public required string FullName { get; set; }
+        public required string Email { get; set; }
+        public required string PassWord { get; set; }
+        public required string PhoneNumber { get; set; }
     }
 }

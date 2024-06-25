@@ -24,12 +24,19 @@ namespace Kallum.Data
             base.OnModelCreating(builder);
 
             //will add foreign keys later
-            builder.Entity<UserAccount>()
-                       .HasOne(b => b.BankAccount);
-            builder.Entity<UserAccount>()
-                       .HasOne(b => b.BalanceDetails);
+            // builder.Entity<Portfolio>(x => x.HasKey(p => new { p.AppUserId, p.StockId }));
+            // builder.Entity<Portfolio>().HasOne(u => u.AppUser).WithMany(u => u.Portfolios).HasForeignKey(p => p.AppUserId);
+
+            // builder.Entity<Portfolio>().HasOne(u => u.Stocks).WithMany(u => u.Portfolios).HasForeignKey(p => p.StockId);
 
 
+            builder.Entity<UserBankAccountInformation>(x =>
+         {
+             x.HasKey(key => new { key.AppUserId });
+         });
+
+            builder.Entity<UserBankAccountInformation>().HasOne(u => u.AppUser).WithMany(t => t.FullInformation).HasForeignKey(k => k.AppUserId);
+            // builder.Entity<BankAccount>().HasOne(u => u.AppUser).WithOne(o=>o.);
 
             //
             List<IdentityRole> roles = new List<IdentityRole> {

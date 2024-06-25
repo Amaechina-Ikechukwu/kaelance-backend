@@ -4,8 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kallum.Data;
 using Kallum.DTOS;
+using Kallum.DTOS.Bank;
 using Kallum.Interfaces;
+using Kallum.Mappers;
 using Kallum.Models;
+using Kallum.Service;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,14 +22,16 @@ namespace Kallum.Repository
         private readonly SignInManager<AppUser> _signInManager;
 
         private readonly ITokenService _tokenService;
+        public readonly UserIdService _userIdService;
 
 
-        public RegisterRepository(ApplicationDBContext context, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService)
+        public RegisterRepository(ApplicationDBContext context, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, UserIdService userIdService)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
+            _userIdService = userIdService;
         }
 
         public async Task<NewUserDto> RegisterUserAsync(RegisterDto registerData)
@@ -34,23 +39,27 @@ namespace Kallum.Repository
 
             var appUser = new AppUser
             {
-                UserName = registerData.FullName.Replace(" ", "_"),
-                Email = registerData.Email,
-                PhoneNumber = registerData.PhoneNumber
+                UserName = registerData?.FullName?.Replace(" ", "_"),
+                Email = registerData?.Email,
+                PhoneNumber = registerData?.PhoneNumber
             };
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var createdUser = await _userManager.CreateAsync(appUser, registerData.PassWord);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             if (createdUser.Succeeded)
             {
                 var roleResult = await _userManager.AddToRoleAsync(appUser, "User");
                 if (roleResult.Succeeded)
                 {
+#pragma warning disable CS8601 // Possible null reference assignment.
                     return new NewUserDto
                     {
                         UserName = appUser.UserName,
                         Email = appUser.Email,
                         Token = _tokenService.CreateToken(appUser)
                     };
+#pragma warning restore CS8601 // Possible null reference assignment.
                 }
                 else
                 {
@@ -68,7 +77,9 @@ namespace Kallum.Repository
         {
             Console.WriteLine(loginData.UserName, loginData.PassWord);
             var normailizedName = loginData.UserName.Replace(" ", "_").ToLower();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var user = await _userManager.Users.FirstOrDefaultAsync(user => user.UserName.ToLower() == normailizedName);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             if (user is null) return null;
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginData.PassWord, false);
 
@@ -84,6 +95,162 @@ namespace Kallum.Repository
                 Email = user.Email,
                 Token = _tokenService.CreateToken(user)
             };
+        }
+
+        public async Task<KallumLockDto> GetKallumLockStatus(string username)
+        {
+            try
+            {
+                var userId = await _userIdService.GetUserId(username);
+                var KallumLock = await _context.KallumLockData.FirstOrDefaultAsync(details => details.AppUserId == userId);
+
+                if (KallumLock is null)
+                {
+                    return new KallumLockDto
+                    {
+                        TransactionPin = null,
+                        SecurePin = null
+                    };
+                }
+                return new KallumLockDto
+                {
+                    TransactionPin = KallumLock.TransactionPin,
+                    SecurePin = KallumLock.SecurePin
+                };
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.ToString());
+            }
+        }
+
+        public async Task<string?> SetKallumLock(string username, KallumLockDto lockdetails)
+        {
+            try
+            {
+                var userId = await _userIdService.GetUserId(username);
+                if (lockdetails.SecurePin != null && lockdetails.TransactionPin != null)
+                {
+                    var kallumLock = new KallumLock
+                    {
+                        SecurePin = lockdetails.SecurePin,
+                        TransactionPin = lockdetails.TransactionPin,
+                        AppUserId = userId
+                    };
+                    await _context.KallumLockData.AddAsync(kallumLock);
+                    await _context.SaveChangesAsync();
+                    return "Done";
+                }
+
+                else { return null; }
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.ToString());
+            }
+        }
+        public async Task<string> UpdateKallumLock(string username, KallumLockDto lockDetail)
+        {
+            try
+            {
+                var userId = await _userIdService.GetUserId(username);
+
+                // Find the existing KallumLock for the given userId
+                var kallumLock = await _context.KallumLockData.FirstOrDefaultAsync(kl => kl.AppUserId == userId);
+
+                if (kallumLock == null)
+                {
+                    // Create a new KallumLock if it doesn't exist
+                    kallumLock = new KallumLock
+                    {
+                        AppUserId = userId,
+                        TransactionPin = "",
+                        SecurePin = ""
+                    };
+                    _context.KallumLockData.Add(kallumLock);
+                }
+
+                if (!string.IsNullOrEmpty(lockDetail.SecurePin) && !string.IsNullOrWhiteSpace(lockDetail.SecurePin) && kallumLock.SecurePin != lockDetail.SecurePin)
+                {
+                    kallumLock.SecurePin = lockDetail.SecurePin;
+                    _context.Entry(kallumLock).Property(kl => kl.SecurePin).IsModified = true;
+                }
+
+                if (!string.IsNullOrEmpty(lockDetail.TransactionPin) && !string.IsNullOrWhiteSpace(lockDetail.TransactionPin) && kallumLock.TransactionPin != lockDetail.TransactionPin)
+                {
+                    kallumLock.TransactionPin = lockDetail.TransactionPin;
+                    _context.Entry(kallumLock).Property(kl => kl.TransactionPin).IsModified = true;
+                }
+
+                await _context.SaveChangesAsync();
+                return "Done";
+            }
+            catch
+            {
+                // Log the exception here if necessary
+                throw;
+            }
+        }
+
+
+        public async Task<bool> IsSecurePinCorrect(string username, SecurePinRequest SecurePin)
+        {
+            try
+            {
+                var userId = await _userIdService.GetUserId(username);
+
+                // Find the existing KallumLock for the given userId
+                var kallumLock = await _context.KallumLockData.FirstOrDefaultAsync(kl => kl.AppUserId == userId);
+
+
+                if (kallumLock == null)
+                {
+                    throw new Exception($"KallumLock not found for userId: {userId}");
+                }
+                if (kallumLock.SecurePin == SecurePin.SecurePin)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                // Log the exception here if necessary
+                throw;
+            }
+        }
+
+        public async Task<bool> IsTransactionPinCorrect(string username, TransactionPinRequest TransactionPin)
+        {
+            try
+            {
+                var userId = await _userIdService.GetUserId(username);
+
+                // Find the existing KallumLock for the given userId
+                var kallumLock = await _context.KallumLockData.FirstOrDefaultAsync(kl => kl.AppUserId == userId);
+
+
+                if (kallumLock == null)
+                {
+                    throw new Exception($"KallumLock not found for userId: {userId}");
+                }
+                if (kallumLock.TransactionPin == TransactionPin.TransactionPin)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                // Log the exception here if necessary
+                throw;
+            }
         }
     }
 }

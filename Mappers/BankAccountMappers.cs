@@ -17,7 +17,12 @@ namespace Kallum.Mappers
                 AccountType = bankAccount.AccountType,
                 CreatedDate = bankAccount.CreatedDate,
                 Status = bankAccount.Status,
-                BankAccountId = bankAccount.BankAccountId
+                BankAccountId = bankAccount.BankAccountId,
+                KallumUser = new AppUserDto
+                {
+                    Email = bankAccount.AppUser.Email,
+                    UserName = bankAccount.AppUser.UserName
+                }
 
             };
         }
@@ -28,6 +33,15 @@ namespace Kallum.Mappers
                 SecurePin = kallumLock.SecurePin,
                 TransactionPin = kallumLock.TransactionPin
 
+            };
+        }
+
+        public static AppUserDto ToAppUserDto(this UserAccount userAccount)
+        {
+            return new AppUserDto
+            {
+                Email = userAccount.Email,
+                UserName = userAccount.FullName
             };
         }
     }

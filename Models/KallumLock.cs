@@ -8,9 +8,9 @@ namespace Kallum.Models
     public class KallumLock
     {
         public int Id { get; set; }
-        public int SecurePin { get; set; }
-        public int TransactionPin { get; set; }
-        public string UserAccountId { get; set; }
+        public string? SecurePin { get; set; }
+        public string? TransactionPin { get; set; }
+        public required string AppUserId { get; set; }
 
     }
 }
