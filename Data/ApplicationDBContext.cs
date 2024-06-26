@@ -18,6 +18,7 @@ namespace Kallum.Data
         public DbSet<TransactionHistory> TransactionHistoriesData { get; set; }
         public DbSet<BalanceDetails> BalanceDetailsData { get; set; }
         public DbSet<KallumLock> KallumLockData { get; set; }
+        public DbSet<FinanceCircle> FinanceCircleData { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

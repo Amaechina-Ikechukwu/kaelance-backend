@@ -95,6 +95,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegisterRepository, RegisterRepository>();
 builder.Services.AddScoped<IBankOperationRepository, BankOperationRepository>();
 builder.Services.AddScoped<ITransactionsRepository, TransactionRepository>();
+builder.Services.AddScoped<IFinanceCircleRepository, FinanceCircleRepository>();
 builder.Services.AddScoped<UserIdService>();
 var app = builder.Build();
 

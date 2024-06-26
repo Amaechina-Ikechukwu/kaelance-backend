@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Kallum")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cefd5c8d0a69644f75334e0cf1c801a746b3d859")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dc249ed556fa41421ab236118d942c1e155a3046")]
 [assembly: System.Reflection.AssemblyProductAttribute("Kallum")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Kallum")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

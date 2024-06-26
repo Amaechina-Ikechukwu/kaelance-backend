@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kallum.Data;
 using Kallum.DTOS;
 using Kallum.DTOS.Bank;
+using Kallum.Helper;
 using Kallum.Interfaces;
 using Kallum.Mappers;
 using Kallum.Models;
@@ -79,6 +80,38 @@ namespace Kallum.Service
                 throw new Exception(e.ToString());
             }
         }
+        public async Task<List<BankAccountDto?>> FindBankUser(FinanceCircleQueryObject query)
+        {
+            var queryUsers = _context.BankAccountsData.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.BankAccountId))
+            {
+                queryUsers = queryUsers.Where(user => user.BankAccountId.Contains(query.BankAccountId));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.UserName))
+            {
+                queryUsers = queryUsers.Where(user => user.AppUser.UserName.ToLower().Contains(query.UserName.ToLower()));
+            }
+
+            var result = await queryUsers
+                .Select(user => new BankAccountDto
+                {
+
+                    BankAccountId = user.BankAccountId,
+                    KallumUser = new AppUserDto
+                    {
+                        Email = user.AppUser.Email,
+                        UserName = user.AppUser.UserName,
+
+                        // Add other fields as necessary
+                    }
+                })
+                .ToListAsync();
+
+            return result;
+        }
+
 
         public async Task<BalanceDetails?> GetBalanceDetails(string username)
         {

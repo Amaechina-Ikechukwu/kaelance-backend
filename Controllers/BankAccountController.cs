@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kallum.Data;
 using Kallum.DTOS.Bank;
 using Kallum.Extensions;
+using Kallum.Helper;
 using Kallum.Interfaces;
 using Kallum.Models;
 using Kallum.Service;
@@ -81,6 +82,29 @@ namespace Kallum.Controllers
                     return NotFound(new { message = "Bank account not found." });
                 }
                 return Ok(bankDetailsResult);
+            }
+            catch (Exception e)
+            {
+                // Log the exception (not shown here for brevity)
+                return StatusCode(500, new { message = "An error occurred while processing your request.", details = e.Message });
+            }
+        }
+        [HttpGet("findkallumuser")]
+        [Authorize]
+        public async Task<IActionResult> FindUser([FromQuery] FinanceCircleQueryObject query)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var queriedUser = await _bankRepository.FindBankUser(query);
+                if (queriedUser is null)
+                {
+                    return BadRequest();
+                }
+                return Ok(queriedUser);
             }
             catch (Exception e)
             {

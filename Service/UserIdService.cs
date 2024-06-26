@@ -41,6 +41,27 @@ namespace Kallum.Service
 
             return userInfo;
         }
+        public async Task<string> GetUserName(string userId)
+        {
+            var userInfo = await _userManager.FindByIdAsync(userId);
+            if (userInfo == null)
+            {
+                throw new KeyNotFoundException($"User with username '{userId}' not found.");
+            }
+
+            return userInfo.UserName;
+        }
+        public async Task<string> GetUserEmail(string userId)
+        {
+            var userInfo = await _userManager.FindByIdAsync(userId);
+            if (userInfo == null)
+            {
+                throw new KeyNotFoundException($"User with username '{userId}' not found.");
+            }
+
+            return userInfo.Email;
+        }
+
 
         public async Task<string> GetBankAccountNumber(string userId)
         {
