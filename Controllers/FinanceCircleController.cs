@@ -28,6 +28,7 @@ namespace Kallum.Controllers
             {
                 return BadRequest(ModelState);
             }
+
             var circleStatus = await _financeCircleRepository.CreateFinanceCircle(createFinance);
             if (circleStatus is null)
             {

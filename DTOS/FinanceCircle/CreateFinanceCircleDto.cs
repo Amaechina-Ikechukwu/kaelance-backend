@@ -8,29 +8,24 @@ namespace Kallum.DTOS.FinanceCircle
     public class CreateFinanceCircleDto
     {
         // Unique identifier for the finance circle
-        public required string CircleId { get; set; }
+        public Guid CircleId { get; set; }
 
         // Name of the circle
         public required string Name { get; set; }
 
-        // Total amount committed to this circle by friends
-        public decimal TotalAmountCommitted { get; set; }
+
 
         // List of friends with name and email (limit to six)
-        public List<Friend> Friends { get; set; } = new List<Friend>();
+        public List<string> Friends { get; set; } = new List<string>();
 
         // Fund withdrawal approval count
         public int FundWithdrawalApprovalCount { get; set; }
+        // Fund withdrawal approval count
 
-        // Withdrawal status
-        public required string WithdrawalStatus { get; set; }
 
-        // ID of who initiated the withdrawal
-        public required string WithdrawalInitiatorId { get; set; }
+        public int PersonalCommittmentPercentage { get; set; }
 
-        //Withdrawl percentage limit {get;set;}
-
-        public required int WithdrawalLimitPercentage { get; set; }
+        public required int WithdrawalChargePercentage { get; set; }
 
         // ID of the creator of the circle
         public required string CreatorId { get; set; }
@@ -39,6 +34,7 @@ namespace Kallum.DTOS.FinanceCircle
 
         // Type of circle (monarch or democratic)
         public CircleType CircleType { get; set; }
+        public Status Status { get; set; }
     }
     // Helper class for friends
     public class Friend
@@ -54,5 +50,10 @@ namespace Kallum.DTOS.FinanceCircle
     {
         Monarch,
         Democratic
+    }
+
+    public enum Status
+    {
+        Active, Suspended, Disabled, Deleted
     }
 }

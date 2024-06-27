@@ -12,6 +12,10 @@ namespace Kallum.Mappers
     {
         public static BankAccountDto ToBankAccountDto(this BankAccount bankAccount)
         {
+            if (bankAccount == null)
+            {
+                throw new ArgumentNullException(nameof(bankAccount), "Bank account is null");
+            }
             return new BankAccountDto
             {
                 AccountType = bankAccount.AccountType,

@@ -29,7 +29,10 @@ namespace Kallum.Data
             // builder.Entity<Portfolio>().HasOne(u => u.AppUser).WithMany(u => u.Portfolios).HasForeignKey(p => p.AppUserId);
 
             // builder.Entity<Portfolio>().HasOne(u => u.Stocks).WithMany(u => u.Portfolios).HasForeignKey(p => p.StockId);
-
+            builder.Entity<FinanceCircle>(entity =>
+        {
+            entity.Property(e => e.CircleId).HasColumnType("uuid");
+        });
 
             builder.Entity<UserBankAccountInformation>(x =>
          {

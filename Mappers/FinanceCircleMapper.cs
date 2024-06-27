@@ -15,18 +15,14 @@ namespace Kallum.Mappers
             {
                 CircleId = dto.CircleId,
                 Name = dto.Name,
-                TotalAmountCommitted = dto.TotalAmountCommitted,
-                Friends = dto.Friends.Select(f => new Kallum.Models.Friend
-                {
-                    BankId = f.BankId
-                }).ToList(),
+                Friends = dto.Friends,
                 FundWithdrawalApprovalCount = dto.FundWithdrawalApprovalCount,
-                WithdrawalStatus = dto.WithdrawalStatus,
-                WithdrawalInitiatorId = dto.WithdrawalInitiatorId,
-                WithdrawalLimitPercentage = dto.WithdrawalLimitPercentage,
+                WithdrawalChargePercentage = dto.WithdrawalChargePercentage,
+                PersonalCommittmentPercentage = dto.PersonalCommittmentPercentage,
                 CreatorId = dto.CreatorId,
 
-                CircleType = (Models.CircleType)dto.CircleType
+                CircleType = (Models.CircleType)dto.CircleType,
+                Status = (Models.Status)dto.Status
             };
         }
     }

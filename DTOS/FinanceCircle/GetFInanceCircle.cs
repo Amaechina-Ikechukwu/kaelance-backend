@@ -8,7 +8,7 @@ namespace Kallum.DTOS.FinanceCircle
 {
     public class GetFInanceCircle
     {
-        public required string CircleId { get; set; }
+        public required Guid CircleId { get; set; }
 
         // Name of the circle
         public required string Name { get; set; }
@@ -22,11 +22,11 @@ namespace Kallum.DTOS.FinanceCircle
         // Fund withdrawal approval count
         public int FundWithdrawalApprovalCount { get; set; }
 
-        // Withdrawal status
-        public required string WithdrawalStatus { get; set; }
 
-        // ID of who initiated the withdrawal
-        public required string WithdrawalInitiatorId { get; set; }
+
+        public int PersonalCommittmentPercentage { get; set; }
+
+        public required int WithdrawalChargePercentage { get; set; }
 
         //Withdrawl percentage limit {get;set;}
 
@@ -40,6 +40,8 @@ namespace Kallum.DTOS.FinanceCircle
 
         // Type of circle (monarch or democratic)
         public CircleType CircleType { get; set; }
+
+        public Status Status { get; set; }
 
 
     }
