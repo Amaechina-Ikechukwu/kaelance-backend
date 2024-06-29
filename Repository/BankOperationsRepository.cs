@@ -125,7 +125,10 @@ namespace Kallum.Service
                     Currency = ba.Currency,
                     CurrencySymbol = ba.CurrencySymbol,
                     CurrentBalance = ba.CurrentBalance ?? 0.0m,
-                    Id = ba.Id
+                    Id = ba.Id,
+                    TotalCommittment = ba.TotalCommittment,
+                    LastUpdated = ba.LastUpdated
+
 
                 })
                 .FirstOrDefaultAsync();
@@ -172,7 +175,6 @@ namespace Kallum.Service
                 })
                 .FirstOrDefaultAsync();
         }
-
 
 
     }

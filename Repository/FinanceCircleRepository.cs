@@ -4,11 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kallum.Data;
 using Kallum.DTOS.FinanceCircle;
+using Kallum.Helper;
 using Kallum.Interfaces;
 using Kallum.Mappers;
 using Kallum.Models;
 using Kallum.Service;
 using Microsoft.EntityFrameworkCore;
+using Sprache;
 
 namespace Kallum.Repository
 {
@@ -16,10 +18,15 @@ namespace Kallum.Repository
     {
         public readonly ApplicationDBContext _context;
         public readonly UserIdService _userIdService;
-        public FinanceCircleRepository(ApplicationDBContext context, UserIdService userIdService)
+        public readonly ServiceComputations _serviceComputations;
+        public readonly IBankOperationRepository _bankOperationRepository;
+        public FinanceCircleRepository(ApplicationDBContext context, UserIdService userIdService, ServiceComputations serviceComputations, IBankOperationRepository bankOperationRepository)
         {
             _context = context;
             _userIdService = userIdService;
+            _serviceComputations = serviceComputations;
+            _bankOperationRepository = bankOperationRepository;
+
         }
 
         public async Task<List<GetFInanceCircle>> AllFinanceCircle(string username)
@@ -57,8 +64,7 @@ namespace Kallum.Repository
                         var accountInfo = await _userIdService.GetBankAccountInfo(bankId);
                         if (accountInfo == null)
                         {
-                            // Log the error
-                            Console.WriteLine($"Account info not found for bank ID: {bankId}");
+
                             continue;
                         }
 
@@ -105,16 +111,28 @@ namespace Kallum.Repository
             return circleList;
         }
 
-        public async Task<string> CreateFinanceCircle(CreateFinanceCircleDto circleInfo)
+        public async Task<string> CreateFinanceCircle(CreateFinanceCircleDto circleInfo, string username)
         {
             try
             {
-                circleInfo.CircleId = Guid.NewGuid();
-                Console.WriteLine(circleInfo.CircleId);
+                var userId = await _userIdService.GetUserId(username);
+                bool isEligible = await _serviceComputations.UpdateUsersCommittments(circleInfo.CreatorId, circleInfo.PersonalCommittmentPercentage);
+                if (isEligible)
+                {
+                    circleInfo.CircleId = Guid.NewGuid();
 
-                await _context.FinanceCircleData.AddAsync(circleInfo.ToCreateFinanceCircleDto());
-                await _context.SaveChangesAsync();
-                return "Group Created";
+                    circleInfo.CreatorId = userId;
+                    await _context.FinanceCircleData.AddAsync(circleInfo.ToCreateFinanceCircleDto());
+                    await _context.SaveChangesAsync();
+                    return "Group Created";
+                }
+                else
+                {
+                    return "You do not have enough fund to commit";
+                }
+
+
+
 
             }
             catch (Exception e)
@@ -123,6 +141,32 @@ namespace Kallum.Repository
             }
         }
 
+        public async Task<EligibilityResult> IsUserEligible(string username)
+        {
 
+            var balanceInfo = await _context.BalanceDetailsData
+                .Include(b => b.BankAccountDetails)
+                .FirstOrDefaultAsync(b => b.BankAccountDetails.AppUser.UserName == username);
+
+            if (balanceInfo == null)
+            {
+                return new EligibilityResult { Result = false, Message = "User balnce info no found" }; // Balance information not found
+            }
+            if (balanceInfo.TotalCommittment == 0 && balanceInfo.CurrentBalance > 10)
+            {
+                return new EligibilityResult { Result = true };
+            }
+            decimal totalCommittmentValue = (decimal)((decimal)balanceInfo.TotalCommittment / 100 * balanceInfo.CurrentBalance);
+            Console.WriteLine($"TotalCommitmentValue: {totalCommittmentValue}");
+            if (totalCommittmentValue > 5)
+            {
+                return new EligibilityResult { Result = true };
+            }
+            else
+            {
+                return new EligibilityResult { Result = false, Message = "Your current balance may not support this new circle. Please top up" };
+            }
+
+        }
     }
 }

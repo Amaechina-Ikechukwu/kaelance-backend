@@ -28,8 +28,9 @@ namespace Kallum.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var username = User.GetUsername();
 
-            var circleStatus = await _financeCircleRepository.CreateFinanceCircle(createFinance);
+            var circleStatus = await _financeCircleRepository.CreateFinanceCircle(createFinance, username);
             if (circleStatus is null)
             {
                 return BadRequest();
@@ -47,6 +48,14 @@ namespace Kallum.Controllers
                 return NotFound();
             }
             return Ok(financeCircle);
+        }
+        [HttpGet("eligible")]
+        [Authorize]
+        public async Task<IActionResult> CheckEligibility()
+        {
+            var username = User.GetUsername();
+            var IsUserEligible = await _financeCircleRepository.IsUserEligible(username);
+            return Ok(IsUserEligible);
         }
     }
 }

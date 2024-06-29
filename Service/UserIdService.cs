@@ -61,6 +61,16 @@ namespace Kallum.Service
 
             return userInfo.Email;
         }
+        public async Task<string?> GetIdByUserEmail(string email)
+        {
+            var userInfo = await _userManager.FindByEmailAsync(email);
+            if (userInfo == null)
+            {
+                throw new KeyNotFoundException($"User with username '{email}' not found.");
+            }
+
+            return userInfo.Id;
+        }
 
 
         public async Task<string?> GetBankAccountNumber(string userId)
@@ -74,14 +84,31 @@ namespace Kallum.Service
         }
         public async Task<BankAccountDto?> GetBankAccountInfo(string bankAccountId)
         {
-            var accountInfo = await _context.BankAccountsData.FirstOrDefaultAsync(user => user.BankAccountId == bankAccountId);
+            var queryUsers = _context.BankAccountsData.AsQueryable();
 
-            if (accountInfo == null)
+            if (!string.IsNullOrWhiteSpace(bankAccountId))
             {
-                throw new ArgumentNullException(nameof(accountInfo), "Bank account is null");
+                queryUsers = queryUsers.Where(user => user.BankAccountId.Contains(bankAccountId));
             }
 
-            return accountInfo.ToBankAccountDto();
+
+
+            var result = await queryUsers
+                .Select(user => new BankAccountDto
+                {
+
+                    BankAccountId = user.BankAccountId,
+                    KallumUser = new AppUserDto
+                    {
+                        Email = user.AppUser.Email,
+                        UserName = user.AppUser.UserName,
+
+                        // Add other fields as necessary
+                    }
+                })
+                .FirstOrDefaultAsync();
+
+            return result;
         }
 
     }

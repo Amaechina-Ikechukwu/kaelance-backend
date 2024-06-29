@@ -1,23 +1,28 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Kallum.DTOS.Transactions;
 using Kallum.Extensions;
+using Kallum.Helper;
+using Kallum.Models;
 using Kallum.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace Kallum.Controllers
 {
     [ApiController]
     [Route("api/transactions")]
-    public class Transactions : ControllerBase
+    public class TransactionsController : ControllerBase
     {
         private readonly ITransactionsRepository _transactionRepository;
-        public Transactions(ITransactionsRepository transactionsRepository)
+        private readonly string _secretHash;
+
+        public TransactionsController(ITransactionsRepository transactionsRepository, IOptions<FlwSecretOptions> flwSecretOptions)
         {
             _transactionRepository = transactionsRepository;
+            _secretHash = flwSecretOptions.Value.SecretHash;
         }
 
         [HttpPost("bloataccount")]
@@ -34,9 +39,10 @@ namespace Kallum.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, e);
+                return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
             }
         }
+
         [HttpPost("sendMoney")]
         [Authorize]
         public async Task<IActionResult> SendMoney([FromBody] CreateTransactionDto transactionDto)
@@ -54,7 +60,7 @@ namespace Kallum.Controllers
             }
             catch (Exception e)
             {
-                return StatusCode(500, e);
+                return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
             }
         }
 
@@ -74,7 +80,6 @@ namespace Kallum.Controllers
 
                 if (transactionResult == null)
                 {
-                    // Log the issue for further diagnosis
                     return NotFound("No transaction history found.");
                 }
 
@@ -82,11 +87,35 @@ namespace Kallum.Controllers
             }
             catch (Exception e)
             {
-                // Log the exception for further diagnosis
                 return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
             }
         }
 
+        [HttpPost("topup-webhook")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Webhook([FromBody] ChargeCompletedEvent webhookEvent, [FromHeader(Name = "verify-hash")] string signature)
+        {
+            try
+            {
+                string webhookEventJson = JsonConvert.SerializeObject(webhookEvent, Formatting.Indented);
+                Console.WriteLine(webhookEventJson);
+                if (string.IsNullOrEmpty(signature) || signature != _secretHash)
+                {
+                    // This request isn't from Flutterwave; discard
+                    return Unauthorized();
+                }
 
+                var eventResponse = await _transactionRepository.TopUpWeebhook(webhookEvent);
+                if (eventResponse == null)
+                {
+                    return NoContent();
+                }
+                return Ok(eventResponse);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
+            }
+        }
     }
 }

@@ -112,6 +112,9 @@ namespace Kallum.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("TotalCommittment")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BankAccountDetailsId");
@@ -365,13 +368,13 @@ namespace Kallum.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3d03480f-5dd8-4c38-b4f4-61ce909c2a86",
+                            Id = "89bbdcc4-7c47-4550-a19d-3973c39949e0",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "9f352a3f-30ea-4d0d-86ee-00cfa84a6666",
+                            Id = "15306004-9b7b-40d6-8924-1b6a91b977b0",
                             Name = "User",
                             NormalizedName = "USER"
                         });

@@ -9,5 +9,6 @@
         public string Currency { get; set; }
         public string CurrencySymbol { get; set; }
         public DateTime LastUpdated { get; set; }
+        public int TotalCommittment { get; set; }
     }
 }

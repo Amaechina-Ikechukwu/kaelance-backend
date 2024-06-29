@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kallum.Data;
 using Kallum.DTOS.Transactions;
+using Kallum.Helper;
 using Kallum.Models;
 using Kallum.Service;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -177,7 +178,33 @@ namespace Kallum.Repository
             }
             return completeTransactionInformation;
         }
+        public async Task<string> TopUpWeebhook(ChargeCompletedEvent webhookEvent)
+        {
+            try
+            {
+                // Retrieve the customer ID using the email from the webhook event
+                string customerId = await _userIdService.GetIdByUserEmail(webhookEvent.Data.Customer.Email);
 
+                // Check if the customer ID is null
+                if (customerId == null)
+                {
+                    return "Customer not found";
+                }
+
+                // Retrieve the amount from the webhook event
+                decimal amount = webhookEvent.Data.Amount;
+
+                // Update the receiver's account with the specified amount
+                await UpdateReceiversAccount(customerId, amount);
+
+                return "Account updated";
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.ToString());
+            }
+
+        }
 
     }
 }

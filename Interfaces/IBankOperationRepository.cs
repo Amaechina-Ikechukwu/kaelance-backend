@@ -15,5 +15,6 @@ namespace Kallum.Interfaces
         Task<BalanceDetails?> GetBalanceDetails(string username);
         Task<BankAccountDto?> GetBankAccountAsync(string bankId);
         Task<List<BankAccountDto?>> FindBankUser(FinanceCircleQueryObject query);
+
     }
 }
