@@ -41,7 +41,8 @@ namespace Kallum.Repository
             {
                 UserName = registerData?.FullName?.Replace(" ", "_"),
                 Email = registerData?.Email,
-                PhoneNumber = registerData?.PhoneNumber
+                PhoneNumber = registerData?.PhoneNumber,
+
             };
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var createdUser = await _userManager.CreateAsync(appUser, registerData.PassWord);
@@ -73,19 +74,37 @@ namespace Kallum.Repository
                 throw new Exception(errorMessage);
             }
         }
-        public async Task<NewUserDto> LoginUserAsync(LoginDto loginData)
+        public async Task<NewUserDto?> LoginUserAsync(LoginDto loginData)
         {
-            Console.WriteLine(loginData.UserName, loginData.PassWord);
-            var normailizedName = loginData.UserName.Replace(" ", "_").ToLower();
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var user = await _userManager.Users.FirstOrDefaultAsync(user => user.UserName.ToLower() == normailizedName);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            if (user is null) return null;
+            if (loginData == null || string.IsNullOrEmpty(loginData.UserName) || string.IsNullOrEmpty(loginData.PassWord))
+            {
+                return null;
+            }
+
+            // Check if the input is an email
+            var isEmail = IsValidEmail(loginData.UserName);
+
+            string normalizedName;
+            if (isEmail)
+            {
+                normalizedName = loginData.UserName.ToLower();
+            }
+            else
+            {
+                normalizedName = loginData.UserName.Replace(" ", "_").ToLower();
+            }
+
+            var user = await GetUserByNameOrEmailAsync(normalizedName, isEmail);
+
+            if (user == null)
+            {
+                return null;
+            }
+
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginData.PassWord, false);
 
             if (!result.Succeeded)
             {
-
                 throw new Exception("Password is incorrect");
             }
 
@@ -97,6 +116,17 @@ namespace Kallum.Repository
             };
         }
 
+        private async Task<AppUser?> GetUserByNameOrEmailAsync(string userNameOrEmail, bool isEmail)
+        {
+            if (isEmail)
+            {
+                return await _userManager.Users.FirstOrDefaultAsync(user => user.Email.ToLower() == userNameOrEmail);
+            }
+            else
+            {
+                return await _userManager.Users.FirstOrDefaultAsync(user => user.UserName.ToLower() == userNameOrEmail);
+            }
+        }
         public async Task<KallumLockDto> GetKallumLockStatus(string username)
         {
             try
@@ -250,6 +280,18 @@ namespace Kallum.Repository
             {
                 // Log the exception here if necessary
                 throw;
+            }
+        }
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var emailAddress = new System.Net.Mail.MailAddress(email);
+                return emailAddress.Address == email;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

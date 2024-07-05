@@ -66,7 +66,8 @@ namespace Kallum.Service
             var userInfo = await _userManager.FindByEmailAsync(email);
             if (userInfo == null)
             {
-                throw new KeyNotFoundException($"User with username '{email}' not found.");
+
+                return null;
             }
 
             return userInfo.Id;

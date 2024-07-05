@@ -17,7 +17,7 @@ namespace Kallum.Controllers
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionsRepository _transactionRepository;
-        private readonly string _secretHash;
+        private readonly string? _secretHash;
 
         public TransactionsController(ITransactionsRepository transactionsRepository, IOptions<FlwSecretOptions> flwSecretOptions)
         {
@@ -93,7 +93,7 @@ namespace Kallum.Controllers
 
         [HttpPost("topup-webhook")]
         [AllowAnonymous]
-        public async Task<IActionResult> Webhook([FromBody] ChargeCompletedEvent webhookEvent, [FromHeader(Name = "verify-hash")] string signature)
+        public async Task<IActionResult> Webhook([FromBody] ChargeCompletedEvent webhookEvent, [FromHeader(Name = "verif-hash")] string signature)
         {
             try
             {
@@ -114,6 +114,7 @@ namespace Kallum.Controllers
             }
             catch (Exception e)
             {
+
                 return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
             }
         }

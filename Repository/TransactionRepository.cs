@@ -61,7 +61,7 @@ namespace Kallum.Repository
             var accountBalanceInfo = await _context.BankAccountsData.FirstOrDefaultAsync(account => account.BankAccountId == receiver);
 
             var balanceInfo = await _context.BalanceDetailsData.FirstOrDefaultAsync(balance => balance.BankAccountDetails.BankAccountId == receiver);
-            if (balanceInfo == null)
+            if (balanceInfo is null)
             {
                 var newTransaction = new BalanceDetails
                 {
@@ -73,6 +73,7 @@ namespace Kallum.Repository
                 };
                 await _context.BalanceDetailsData.AddAsync(newTransaction);
                 await _context.SaveChangesAsync();
+
                 return newTransaction;
             }
             else
@@ -80,6 +81,7 @@ namespace Kallum.Repository
                 balanceInfo.CurrentBalance += amount;
                 balanceInfo.LastUpdated = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
+
                 return balanceInfo;
             }
         }
@@ -101,7 +103,7 @@ namespace Kallum.Repository
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+
                 throw new Exception(e.ToString());
             }
         }
@@ -183,19 +185,23 @@ namespace Kallum.Repository
             try
             {
                 // Retrieve the customer ID using the email from the webhook event
-                string customerId = await _userIdService.GetIdByUserEmail(webhookEvent.Data.Customer.Email);
+                string customerId = await _userIdService.GetIdByUserEmail(webhookEvent.Customer.Email);
 
                 // Check if the customer ID is null
-                if (customerId == null)
+                if (customerId is null)
                 {
                     return "Customer not found";
                 }
-
+                string bankId = await _userIdService.GetBankAccountNumber(customerId);
+                if (bankId is null)
+                {
+                    return "Bank Id not found";
+                }
                 // Retrieve the amount from the webhook event
-                decimal amount = webhookEvent.Data.Amount;
+                decimal amount = webhookEvent.Amount;
 
                 // Update the receiver's account with the specified amount
-                await UpdateReceiversAccount(customerId, amount);
+                await UpdateReceiversAccount(bankId, amount);
 
                 return "Account updated";
             }

@@ -9,10 +9,10 @@ namespace Kallum.DTOS
     public class BankAccountDto
     {
 
-        public string BankAccountId { get; set; }
-        public string AccountType { get; set; }
+        public string? BankAccountId { get; set; }
+        public string? AccountType { get; set; }
         public DateTime CreatedDate { get; set; }
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public AppUserDto? KallumUser { get; set; }
     }
 }

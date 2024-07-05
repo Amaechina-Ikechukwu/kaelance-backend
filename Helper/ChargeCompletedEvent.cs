@@ -8,111 +8,44 @@ namespace Kallum.Helper
 {
     public class ChargeCompletedEvent
     {
-
-
-        public string Event { get; set; }
-
-
-        public ChargeCompletedData Data { get; set; }
-    }
-
-    public class ChargeCompletedData
-    {
-
         public int Id { get; set; }
-
-
-        public string Tx_ref { get; set; }
-
-
-        public string Flw_ref { get; set; }
-
-
-        public string Device_fingerprint { get; set; }
-
-
+        public string? TxRef { get; set; }
+        public string? FlwRef { get; set; }
+        public string? OrderRef { get; set; }
+        public int? PaymentPlan { get; set; }
+        public int PaymentPage { get; set; }
+        public DateTime CreatedAt { get; set; }
         public decimal Amount { get; set; }
-
-
-        public string Currency { get; set; }
-
-
-        public decimal Charged_amount { get; set; }
-
-
+        public decimal ChargedAmount { get; set; }
+        public string? Status { get; set; }
+        public string? IP { get; set; }
+        public string? Currency { get; set; }
         public decimal AppFee { get; set; }
-
-
         public decimal MerchantFee { get; set; }
-
-
-        public string Processor_response { get; set; }
-
-
-        public string Auth_model { get; set; }
-
-
-        public string Ip { get; set; }
-
-
-        public string Narration { get; set; }
-
-
-        public string Status { get; set; }
-
-
-        public string Payment_type { get; set; }
-
-
-        public DateTime Created_At { get; set; }
-
-
-        public int Account_id { get; set; }
-
-
-        public Customer Customer { get; set; }
-
-
-        public Card Card { get; set; }
+        public int MerchantBearsFee { get; set; }
+        public Customer? Customer { get; set; }
+        public CardEntity? Entity { get; set; }
+        public string? EventType { get; set; }
     }
 
     public class Customer
     {
-
         public int Id { get; set; }
-
-
-        public string Name { get; set; }
-
-
-        public string Phone_number { get; set; }
-
-
-        public string Email { get; set; }
-
-
-        public DateTime Created_at { get; set; }
+        public string? Phone { get; set; }
+        public string? FullName { get; set; }
+        public string? CustomerToken { get; set; }
+        public string? Email { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public int AccountId { get; set; }
     }
 
-    public class Card
+    public class CardEntity
     {
-
-        public string First_6Digits { get; set; }
-
-
-        public string Last_4Digits { get; set; }
-
-
-        public string Issuer { get; set; }
-
-
-        public string Country { get; set; }
-
-
-        public string Type { get; set; }
-
-
-        public string Expiry { get; set; }
+        public string? Card6 { get; set; }
+        public string? CardLast4 { get; set; }
+        public string? CardCountryIso { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
-
 }

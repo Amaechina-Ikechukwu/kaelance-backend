@@ -7,8 +7,8 @@ namespace Kallum.DTOS
 {
     public class AppUserDto
     {
-          public string UserName { get; set; }
-        public string Email { get; set; }
-        
+        public string? UserName { get; set; }
+        public string? Email { get; set; }
+
     }
 }

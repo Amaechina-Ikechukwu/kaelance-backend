@@ -176,3 +176,11 @@ C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\DotNetEnv.dll
 C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Sprache.dll
 C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Npgsql.dll
 C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.APIGatewayEvents.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.ApplicationLoadBalancerEvents.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.AspNetCoreServer.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.AspNetCoreServer.Hosting.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.Core.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.Logging.AspNetCore.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.RuntimeSupport.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.Serialization.SystemTextJson.dll

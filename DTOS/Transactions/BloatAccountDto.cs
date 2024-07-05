@@ -9,7 +9,7 @@ namespace Kallum.DTOS.Transactions
     public class BloatAccountDto
     {
         [Required]
-        public string RecieverId { get; set; }
+        public string? RecieverId { get; set; }
         [Required]
 
         public decimal Amount { get; set; }

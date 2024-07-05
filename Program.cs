@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Kallum.Models;
-
+using Amazon.Lambda.AspNetCoreServer;
 using Kallum.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,17 +87,16 @@ builder.Services.AddScoped<ITransactionsRepository, TransactionRepository>();
 builder.Services.AddScoped<IFinanceCircleRepository, FinanceCircleRepository>();
 builder.Services.AddScoped<UserIdService>();
 builder.Services.AddScoped<ServiceComputations>();
-
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 var app = builder.Build();
-
+app.MapGet("/greet", () => "Hello World!");
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.UseHttpsRedirection();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

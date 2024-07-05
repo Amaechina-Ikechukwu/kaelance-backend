@@ -7,6 +7,6 @@ namespace Kallum.Helper
 {
     public class FlwSecretOptions
     {
-        public string SecretHash { get; set; }
+        public string? SecretHash { get; set; }
     }
 }

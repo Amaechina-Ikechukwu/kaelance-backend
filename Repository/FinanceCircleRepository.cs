@@ -29,7 +29,7 @@ namespace Kallum.Repository
 
         }
 
-        public async Task<List<GetFInanceCircle>> AllFinanceCircle(string username)
+        public async Task<List<GetFInanceCircle>?> AllFinanceCircle(string username)
         {
             var userId = await _userIdService.GetUserId(username);
             if (userId == null)
