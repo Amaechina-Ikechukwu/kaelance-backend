@@ -98,13 +98,13 @@ namespace Kallum.Controllers
             try
             {
                 string webhookEventJson = JsonConvert.SerializeObject(webhookEvent, Formatting.Indented);
-                Console.WriteLine(webhookEventJson);
+                // Console.WriteLine(webhookEventJson);
                 if (string.IsNullOrEmpty(signature) || signature != _secretHash)
                 {
                     // This request isn't from Flutterwave; discard
                     return Unauthorized();
                 }
-
+                // Console.WriteLine("Going");
                 var eventResponse = await _transactionRepository.TopUpWeebhook(webhookEvent);
                 if (eventResponse == null)
                 {

@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Kallum.Helper
 {
@@ -13,7 +10,7 @@ namespace Kallum.Helper
         public string? FlwRef { get; set; }
         public string? OrderRef { get; set; }
         public int? PaymentPlan { get; set; }
-        public int PaymentPage { get; set; }
+        public int? PaymentPage { get; set; }
         public DateTime CreatedAt { get; set; }
         public decimal Amount { get; set; }
         public decimal ChargedAmount { get; set; }
@@ -25,6 +22,7 @@ namespace Kallum.Helper
         public int MerchantBearsFee { get; set; }
         public Customer? Customer { get; set; }
         public CardEntity? Entity { get; set; }
+        [Display(Name = "event.type")]
         public string? EventType { get; set; }
     }
 
