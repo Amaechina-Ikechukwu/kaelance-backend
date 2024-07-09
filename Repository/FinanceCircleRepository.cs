@@ -10,6 +10,7 @@ using Kallum.Mappers;
 using Kallum.Models;
 using Kallum.Service;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Sprache;
 
 namespace Kallum.Repository
@@ -35,7 +36,7 @@ namespace Kallum.Repository
             if (userId == null)
             {
                 // Log the error
-                Console.WriteLine($"User ID not found for username: {username}");
+
                 return null;
             }
 
@@ -43,13 +44,14 @@ namespace Kallum.Repository
             if (bankAccountId == null)
             {
                 // Log the error
-                Console.WriteLine($"Bank account ID not found for user ID: {userId}");
+
                 return null;
             }
 
             var financeCircles = await _context.FinanceCircleData
                 .Where(circle => circle.Friends.Contains(bankAccountId) || circle.CreatorId == bankAccountId)
                 .ToListAsync();
+            var consoleOut = JsonConvert.SerializeObject(financeCircles, Formatting.Indented);
 
             var circleList = new List<GetFInanceCircle>();
 
@@ -78,7 +80,7 @@ namespace Kallum.Repository
                     catch (Exception ex)
                     {
                         // Log the exception
-                        Console.WriteLine($"Exception occurred while getting bank account info for bank ID: {bankId}. Exception: {ex.Message}");
+
                     }
                 }
 
@@ -111,35 +113,49 @@ namespace Kallum.Repository
             return circleList;
         }
 
-        public async Task<string> CreateFinanceCircle(CreateFinanceCircleDto circleInfo, string username)
+        public async Task<CreateCircleResponseDto?> CreateFinanceCircle(CreateFinanceCircleDto circleInfo, string username)
         {
             try
             {
                 var userId = await _userIdService.GetUserId(username);
+                var userBankAccountId = await _userIdService.GetBankAccountNumber(userId);
+                if (userBankAccountId is null)
+                {
+                    return null;
+                }
+                circleInfo.CircleId = Guid.NewGuid();
+                circleInfo.CreatorId = userBankAccountId;
+                circleInfo.Friends.Add(userBankAccountId);
                 bool isEligible = await _serviceComputations.UpdateUsersCommittments(circleInfo.CreatorId, circleInfo.PersonalCommittmentPercentage);
+
                 if (isEligible)
                 {
-                    circleInfo.CircleId = Guid.NewGuid();
 
-                    circleInfo.CreatorId = userId;
+
                     await _context.FinanceCircleData.AddAsync(circleInfo.ToCreateFinanceCircleDto());
                     await _context.SaveChangesAsync();
-                    return "Group Created";
+                    return new CreateCircleResponseDto
+                    {
+                        Message = "Group Created",
+                        CircleId = circleInfo.CircleId
+                    };
                 }
                 else
                 {
-                    return "You do not have enough fund to commit";
+                    return new CreateCircleResponseDto
+                    {
+                        Message = "You do not have enough fund to create group. Update your amount"
+                    };
                 }
-
-
-
 
             }
             catch (Exception e)
             {
+
                 throw new Exception(e.ToString());
             }
         }
+
 
         public async Task<EligibilityResult> IsUserEligible(string username)
         {
@@ -157,7 +173,7 @@ namespace Kallum.Repository
                 return new EligibilityResult { Result = true };
             }
             decimal totalCommittmentValue = (decimal)((decimal)balanceInfo.TotalCommittment / 100 * balanceInfo.CurrentBalance);
-            Console.WriteLine($"TotalCommitmentValue: {totalCommittmentValue}");
+          
             if (totalCommittmentValue > 5)
             {
                 return new EligibilityResult { Result = true };

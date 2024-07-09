@@ -7,11 +7,12 @@ using Kallum.Extensions;
 using Kallum.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Kallum.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/financecircle")]
     public class FinanceCircleController : ControllerBase
     {
         private readonly IFinanceCircleRepository _financeCircleRepository;
@@ -20,7 +21,7 @@ namespace Kallum.Controllers
             _financeCircleRepository = financeCircleRepository;
         }
 
-        [HttpPost("financecircle")]
+        [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateCircle([FromBody] CreateFinanceCircleDto createFinance)
         {
@@ -28,6 +29,8 @@ namespace Kallum.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var data = JsonConvert.SerializeObject(createFinance, Formatting.Indented);
+
             var username = User.GetUsername();
 
             var circleStatus = await _financeCircleRepository.CreateFinanceCircle(createFinance, username);
@@ -37,7 +40,7 @@ namespace Kallum.Controllers
             }
             return Ok(circleStatus);
         }
-        [HttpGet("financeCircle")]
+        [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetFinanceCircle()
         {
