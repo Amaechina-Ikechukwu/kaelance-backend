@@ -17,15 +17,15 @@ namespace Kallum.DTOS.FinanceCircle
 
         // List of friends with name and email (limit to six)
         public List<string> Friends { get; set; } = new List<string>();
-
+        public double TargetAmount { get; set; }
         // Fund withdrawal approval count
-        public int FundWithdrawalApprovalCount { get; set; }
+        public double FundWithdrawalApprovalCount { get; set; }
         // Fund withdrawal approval count
 
+        public double TotalCommittment { get; set; }
+        public double PersonalCommittmentPercentage { get; set; }
 
-        public int PersonalCommittmentPercentage { get; set; }
-
-        public required int WithdrawalChargePercentage { get; set; }
+        public double WithdrawalChargePercentage { get; set; }
 
         // ID of the creator of the circle
         public required string CreatorId { get; set; }

@@ -9,17 +9,17 @@ namespace Kallum.Helper
         public string? TxRef { get; set; }
         public string? FlwRef { get; set; }
         public string? OrderRef { get; set; }
-        public int? PaymentPlan { get; set; }
-        public int? PaymentPage { get; set; }
+        public double? PaymentPlan { get; set; }
+        public double? PaymentPage { get; set; }
         public DateTime CreatedAt { get; set; }
-        public decimal Amount { get; set; }
-        public decimal ChargedAmount { get; set; }
+        public double Amount { get; set; }
+        public double ChargedAmount { get; set; }
         public string? Status { get; set; }
         public string? IP { get; set; }
         public string? Currency { get; set; }
-        public decimal AppFee { get; set; }
-        public decimal MerchantFee { get; set; }
-        public int MerchantBearsFee { get; set; }
+        public double AppFee { get; set; }
+        public double MerchantFee { get; set; }
+        public double MerchantBearsFee { get; set; }
         public Customer? Customer { get; set; }
         public CardEntity? Entity { get; set; }
         [Display(Name = "event.type")]
@@ -36,7 +36,7 @@ namespace Kallum.Helper
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
-        public int AccountId { get; set; }
+        public double AccountId { get; set; }
     }
 
     public class CardEntity

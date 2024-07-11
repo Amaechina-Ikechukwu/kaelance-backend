@@ -23,6 +23,32 @@ namespace Kallum.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Kallum.Models.Activity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("ActivityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ActivityType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("BankId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Activity");
+                });
+
             modelBuilder.Entity("Kallum.Models.AppUser", b =>
                 {
                     b.Property<string>("Id")
@@ -99,21 +125,22 @@ namespace Kallum.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Currency")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CurrencySymbol")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal?>("CurrentBalance")
-                        .HasColumnType("numeric");
+                    b.Property<double?>("CurrentBalance")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("DeclinmentCount")
+                        .HasColumnType("double precision");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("TotalCommittment")
-                        .HasColumnType("integer");
+                    b.Property<double>("TotalCommittment")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
@@ -128,22 +155,18 @@ namespace Kallum.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("AccountType")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("AppUserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("BankAccountId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -151,6 +174,62 @@ namespace Kallum.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("BankAccountsData");
+                });
+
+            modelBuilder.Entity("Kallum.Models.Circle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CircleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("CommitmentHistoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("WithdrawalActionId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("WithdrawalApprovalPercentage")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("CommitmentHistoryId");
+
+                    b.HasIndex("WithdrawalActionId");
+
+                    b.ToTable("CircleData");
+                });
+
+            modelBuilder.Entity("Kallum.Models.CommitmentHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Percentage")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CommitmentHistory");
                 });
 
             modelBuilder.Entity("Kallum.Models.FinanceCircle", b =>
@@ -175,27 +254,30 @@ namespace Kallum.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<int>("FundWithdrawalApprovalCount")
-                        .HasColumnType("integer");
+                    b.Property<double>("FundWithdrawalApprovalCount")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("PersonalCommittmentPercentage")
-                        .HasColumnType("integer");
+                    b.Property<double>("PersonalCommittmentPercentage")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("TotalAmountCommitted")
-                        .HasColumnType("numeric");
+                    b.Property<double>("TargetAmount")
+                        .HasColumnType("double precision");
 
-                    b.Property<int>("WithdrawalChargePercentage")
-                        .HasColumnType("integer");
+                    b.Property<double>("TotalAmountCommitted")
+                        .HasColumnType("double precision");
 
-                    b.Property<int>("WithdrawalLimitPercentage")
-                        .HasColumnType("integer");
+                    b.Property<double>("TotalCommittment")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("WithdrawalChargePercentage")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Id");
 
@@ -212,6 +294,9 @@ namespace Kallum.Migrations
 
                     b.Property<string>("AppUserId")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PushNotificationToken")
                         .HasColumnType("text");
 
                     b.Property<string>("SecurePin")
@@ -231,8 +316,8 @@ namespace Kallum.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
@@ -259,30 +344,25 @@ namespace Kallum.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Currency")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CurrencySymbol")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("RecieverId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SenderId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TransactionDescription")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("TransactionHistoryId")
@@ -328,7 +408,7 @@ namespace Kallum.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TransactionHistoryId")
+                    b.Property<int?>("TransactionHistoryId")
                         .HasColumnType("integer");
 
                     b.HasKey("AppUserId");
@@ -338,6 +418,31 @@ namespace Kallum.Migrations
                     b.HasIndex("TransactionHistoryId");
 
                     b.ToTable("UserBankAccountInformationData");
+                });
+
+            modelBuilder.Entity("Kallum.Models.WithdrawalAction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("ApprovalByAll")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("ApprovedByCreator")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WithdrawalType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WithdrawalAction");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -368,13 +473,13 @@ namespace Kallum.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "89bbdcc4-7c47-4550-a19d-3973c39949e0",
+                            Id = "7f67d870-e6c8-4e35-8e99-e89503cf6ff6",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "15306004-9b7b-40d6-8924-1b6a91b977b0",
+                            Id = "f579f4f0-2cd5-4007-b497-7450dd650c48",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -499,11 +604,32 @@ namespace Kallum.Migrations
                 {
                     b.HasOne("Kallum.Models.AppUser", "AppUser")
                         .WithMany()
-                        .HasForeignKey("AppUserId")
+                        .HasForeignKey("AppUserId");
+
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("Kallum.Models.Circle", b =>
+                {
+                    b.HasOne("Kallum.Models.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AppUser");
+                    b.HasOne("Kallum.Models.CommitmentHistory", "CommitmentHistory")
+                        .WithMany()
+                        .HasForeignKey("CommitmentHistoryId");
+
+                    b.HasOne("Kallum.Models.WithdrawalAction", "WithdrawalAction")
+                        .WithMany()
+                        .HasForeignKey("WithdrawalActionId");
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("CommitmentHistory");
+
+                    b.Navigation("WithdrawalAction");
                 });
 
             modelBuilder.Entity("Kallum.Models.Transaction", b =>
@@ -529,9 +655,7 @@ namespace Kallum.Migrations
 
                     b.HasOne("Kallum.Models.TransactionHistory", "TransactionHistory")
                         .WithMany()
-                        .HasForeignKey("TransactionHistoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TransactionHistoryId");
 
                     b.Navigation("AppUser");
 

@@ -13,7 +13,7 @@ namespace Kallum.Repository
         Task<TransactionHistory> SendMoney(CreateTransactionDto transactionDto, string username);
         Task<List<TransactionHistoryDto>> GetTransactionHistory(string username);
 
-        Task<TransactionHistory> BloatAccount(string reciever, decimal amount);
+        Task<TransactionHistory> BloatAccount(string reciever, double amount);
         Task<string> TopUpWeebhook(ChargeCompletedEvent webhookEvent);
     }
 }

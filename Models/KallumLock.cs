@@ -11,6 +11,6 @@ namespace Kallum.Models
         public string? SecurePin { get; set; }
         public string? TransactionPin { get; set; }
         public required string AppUserId { get; set; }
-
+        public string? PushNotificationToken {get;set;}
     }
 }

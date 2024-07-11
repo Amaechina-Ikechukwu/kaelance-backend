@@ -14,23 +14,23 @@ namespace Kallum.DTOS.FinanceCircle
         public required string Name { get; set; }
 
         // Total amount committed to this circle by friends
-        public decimal TotalAmountCommitted { get; set; }
+        public double TotalAmountCommitted { get; set; }
 
         // List of friends with name and email (limit to six)
         public List<FriendInformation> Friends { get; set; } = new List<FriendInformation>();
 
         // Fund withdrawal approval count
-        public int FundWithdrawalApprovalCount { get; set; }
+        public double FundWithdrawalApprovalCount { get; set; }
+        public double TargetAmount { get; set; }
+        public double TotalCommittment { get; set; }
 
+        public double PersonalCommittmentPercentage { get; set; }
 
-
-        public int PersonalCommittmentPercentage { get; set; }
-
-        public required int WithdrawalChargePercentage { get; set; }
+        public double WithdrawalChargePercentage { get; set; }
 
         //Withdrawl percentage limit {get;set;}
 
-        public required int WithdrawalLimitPercentage { get; set; }
+        public double WithdrawalLimitPercentage { get; set; }
 
         // ID of the creator of the circle
         public required string CreatorId { get; set; }

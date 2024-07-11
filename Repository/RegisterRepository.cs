@@ -127,7 +127,7 @@ namespace Kallum.Repository
                 return await _userManager.Users.FirstOrDefaultAsync(user => user.UserName.ToLower() == userNameOrEmail);
             }
         }
-        public async Task<KallumLockDto> GetKallumLockStatus(string username)
+        public async Task<KallumLockDto?> GetKallumLockStatus(string username)
         {
             try
             {
@@ -211,7 +211,11 @@ namespace Kallum.Repository
                     kallumLock.TransactionPin = lockDetail.TransactionPin;
                     _context.Entry(kallumLock).Property(kl => kl.TransactionPin).IsModified = true;
                 }
-
+                if (!string.IsNullOrEmpty(lockDetail.PushNotificationToken) && !string.IsNullOrWhiteSpace(lockDetail.PushNotificationToken) && kallumLock.PushNotificationToken != lockDetail.PushNotificationToken)
+                {
+                    kallumLock.PushNotificationToken = lockDetail.PushNotificationToken;
+                    _context.Entry(kallumLock).Property(k1 => k1.PushNotificationToken).IsModified = true;
+                }
                 await _context.SaveChangesAsync();
                 return "Done";
             }

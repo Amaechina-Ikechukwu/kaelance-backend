@@ -20,6 +20,8 @@ namespace Kallum.Data
         public DbSet<KallumLock> KallumLockData { get; set; }
         public DbSet<FinanceCircle> FinanceCircleData { get; set; }
 
+        public DbSet<Circle> CircleData { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

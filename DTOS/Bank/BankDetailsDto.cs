@@ -12,7 +12,8 @@ namespace Kallum.DTOS
         public string? UserAccountId { get; set; }
         public string? BankAccountId { get; set; }
         public UserBankAccountInformation? BankAccount { get; set; }
-        public decimal CurrentBalance { get; set; }
+        public double CurrentBalance { get; set; }
         public DateTime LastUpdated { get; set; }
+        public double? DeclinmentCount { get; set; }
     }
 }

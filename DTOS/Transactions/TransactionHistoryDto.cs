@@ -19,7 +19,7 @@ namespace Kallum.DTOS.Transactions
 
         public string? Currency { get; set; }
         public string? CurrencySymbol { get; set; }
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
         public DateTime Date { get; set; }
 
     }

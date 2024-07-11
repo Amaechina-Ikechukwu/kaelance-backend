@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kallum.DTOS.FinanceCircle;
 using Kallum.Extensions;
+using Kallum.Helper;
 using Kallum.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,13 +45,45 @@ namespace Kallum.Controllers
         [Authorize]
         public async Task<IActionResult> GetFinanceCircle()
         {
-            var username = User.GetUsername();
-            var financeCircle = await _financeCircleRepository.AllFinanceCircle(username);
-            if (financeCircle is null)
+            try
             {
-                return NotFound();
+                var username = User.GetUsername();
+                var financeCircle = await _financeCircleRepository.AllFinanceCircle(username);
+                if (financeCircle is null)
+                {
+                    return NotFound();
+                }
+                return Ok(financeCircle);
             }
-            return Ok(financeCircle);
+            catch (Exception e)
+            {
+                return Conflict(new CircleResponseDto
+                {
+                    Message = e.Message
+                });
+            }
+        }
+        [HttpGet("{circleId}")]
+        [Authorize]
+        public async Task<IActionResult> GetSingleCircle([FromRoute] Guid circleId)
+        {
+            try
+            {
+                var financeCircle = await _financeCircleRepository.SingleFinanceCircle(circleId);
+                if (financeCircle is null)
+                {
+                    return NotFound();
+                }
+                return Ok(financeCircle);
+            }
+            catch (Exception e)
+            {
+                return Conflict(new CircleResponseDto
+                {
+                    Message = e.Message
+                });
+            }
+
         }
         [HttpGet("eligible")]
         [Authorize]

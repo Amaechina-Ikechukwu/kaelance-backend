@@ -10,9 +10,10 @@ namespace Kallum.Interfaces
 {
     public interface IFinanceCircleRepository
     {
-        public Task<CreateCircleResponseDto?> CreateFinanceCircle(CreateFinanceCircleDto circleInfo, string username);
+        public Task<CircleResponseDto?> CreateFinanceCircle(CreateFinanceCircleDto circleInfo, string username);
 
         public Task<List<GetFInanceCircle?>> AllFinanceCircle(string username);
+        public Task<GetFInanceCircle?> SingleFinanceCircle(Guid circleId);
 
         public Task<EligibilityResult> IsUserEligible(string username);
     }

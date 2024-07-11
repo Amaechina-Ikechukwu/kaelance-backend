@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kallum.Data;
+using Kallum.DTOS.CircleDto;
 using Kallum.DTOS.FinanceCircle;
 using Kallum.Helper;
 using Kallum.Interfaces;
@@ -21,12 +22,15 @@ namespace Kallum.Repository
         public readonly UserIdService _userIdService;
         public readonly ServiceComputations _serviceComputations;
         public readonly IBankOperationRepository _bankOperationRepository;
-        public FinanceCircleRepository(ApplicationDBContext context, UserIdService userIdService, ServiceComputations serviceComputations, IBankOperationRepository bankOperationRepository)
+        public readonly ICircleRepository _circleRepository;
+
+        public FinanceCircleRepository(ApplicationDBContext context, UserIdService userIdService, ServiceComputations serviceComputations, IBankOperationRepository bankOperationRepository, ICircleRepository circleRepository)
         {
             _context = context;
             _userIdService = userIdService;
             _serviceComputations = serviceComputations;
             _bankOperationRepository = bankOperationRepository;
+            _circleRepository = circleRepository;
 
         }
 
@@ -96,24 +100,24 @@ namespace Kallum.Repository
                 {
                     CircleId = circle.CircleId,
                     Name = circle.Name,
-                    TotalAmountCommitted = circle.TotalAmountCommitted,
                     Friends = friendInfos.Take(6).ToList(),
-                    FundWithdrawalApprovalCount = circle.FundWithdrawalApprovalCount,
-                    WithdrawalChargePercentage = circle.WithdrawalChargePercentage,
-                    PersonalCommittmentPercentage = circle.PersonalCommittmentPercentage,
+
+
                     CreatorId = circle.CreatorId,
-                    TransactionHistory = transactionHistory,
-                    CircleType = (DTOS.FinanceCircle.CircleType)circle.CircleType,
-                    WithdrawalLimitPercentage = circle.WithdrawalLimitPercentage
+
+
                 };
 
                 circleList.Add(circleInfo);
             }
 
-            return circleList;
+            var circleDtoList = circleList.Select(circle => circle.ToGetAllFinanceCircleDto()).ToList();
+
+            return circleDtoList;
+
         }
 
-        public async Task<CreateCircleResponseDto?> CreateFinanceCircle(CreateFinanceCircleDto circleInfo, string username)
+        public async Task<CircleResponseDto?> CreateFinanceCircle(CreateFinanceCircleDto circleInfo, string username)
         {
             try
             {
@@ -125,16 +129,18 @@ namespace Kallum.Repository
                 }
                 circleInfo.CircleId = Guid.NewGuid();
                 circleInfo.CreatorId = userBankAccountId;
+                circleInfo.TotalCommittment += circleInfo.PersonalCommittmentPercentage;
                 circleInfo.Friends.Add(userBankAccountId);
                 bool isEligible = await _serviceComputations.UpdateUsersCommittments(circleInfo.CreatorId, circleInfo.PersonalCommittmentPercentage);
 
                 if (isEligible)
                 {
 
+                    var result = await AddCommitment(userBankAccountId, circleInfo.CircleId, circleInfo.PersonalCommittmentPercentage);
 
                     await _context.FinanceCircleData.AddAsync(circleInfo.ToCreateFinanceCircleDto());
                     await _context.SaveChangesAsync();
-                    return new CreateCircleResponseDto
+                    return new CircleResponseDto
                     {
                         Message = "Group Created",
                         CircleId = circleInfo.CircleId
@@ -142,7 +148,7 @@ namespace Kallum.Repository
                 }
                 else
                 {
-                    return new CreateCircleResponseDto
+                    return new CircleResponseDto
                     {
                         Message = "You do not have enough fund to create group. Update your amount"
                     };
@@ -172,8 +178,8 @@ namespace Kallum.Repository
             {
                 return new EligibilityResult { Result = true };
             }
-            decimal totalCommittmentValue = (decimal)((decimal)balanceInfo.TotalCommittment / 100 * balanceInfo.CurrentBalance);
-          
+            double totalCommittmentValue = (double)((double)balanceInfo.TotalCommittment / 100 * balanceInfo.CurrentBalance);
+
             if (totalCommittmentValue > 5)
             {
                 return new EligibilityResult { Result = true };
@@ -184,5 +190,111 @@ namespace Kallum.Repository
             }
 
         }
+
+        public async Task<GetFInanceCircle?> SingleFinanceCircle(Guid circleId)
+        {
+            var financeCircle = await _context.FinanceCircleData
+                .FirstOrDefaultAsync(circle => circle.CircleId == circleId);
+
+            if (financeCircle == null)
+            {
+                throw new InvalidCastException("Finance circle not found.");
+            }
+
+            var friendInfos = await GetFriendInformation(financeCircle.Friends);
+
+            var circle = new GetFInanceCircle
+            {
+                CircleId = financeCircle.CircleId,
+                Name = financeCircle.Name,
+                Friends = friendInfos.Take(6).ToList(),
+                FundWithdrawalApprovalCount = financeCircle.FundWithdrawalApprovalCount,
+                WithdrawalChargePercentage = financeCircle.WithdrawalChargePercentage,
+                PersonalCommittmentPercentage = financeCircle.PersonalCommittmentPercentage,
+                CreatorId = financeCircle.CreatorId,
+                CircleType = (DTOS.FinanceCircle.CircleType)financeCircle.CircleType,
+                TargetAmount = financeCircle.TargetAmount,
+                TotalCommittment = financeCircle.TotalCommittment
+
+            };
+            var circleDto = circle.ToGetFinanceCircleDto();
+            return circleDto;
+        }
+
+        private async Task<List<FriendInformation>> GetFriendInformation(IEnumerable<string> bankIds)
+        {
+            var friendInfos = new List<FriendInformation>();
+
+            foreach (var bankId in bankIds)
+            {
+                try
+                {
+                    var accountInfo = await _userIdService.GetBankAccountInfo(bankId);
+                    if (accountInfo?.KallumUser != null)
+                    {
+                        friendInfos.Add(new FriendInformation
+                        {
+                            UserName = accountInfo.KallumUser.UserName,
+                            Email = accountInfo.KallumUser.Email
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+            }
+
+            return friendInfos;
+        }
+        private async Task<CircleResponseDto?> AddCommitment(string bankId, Guid circleId, double percentage)
+        {
+            try
+            {
+                // Retrieve the finance circle information based on the circleId
+
+                DateTime dateTime = DateTime.UtcNow;
+
+                // Create the response object with activity and commitment history
+                var response = new CreateCircleActivity
+                {
+                    Activity = new DTOS.CircleDto.Activity
+                    {
+                        ActivityId = Guid.NewGuid(),
+                        BankId = bankId,
+                        DateTime = dateTime,
+                        ActivityType = 0
+                    },
+                    CircleId = circleId,
+                    CommitmentHistory = new DTOS.CircleDto.CommitmentHistory
+                    {
+                        DateTime = dateTime,
+                        TransactionId = Guid.NewGuid(),
+                        Percentage = percentage
+                    }
+                };
+
+                // Update the total commitment
+
+
+                // Add the response to the CircleData
+                await _context.CircleData.AddAsync(response.ToCreateCircleActivityDto());
+                await _context.SaveChangesAsync();
+
+                // Return the response DTO
+                return new CircleResponseDto
+                {
+                    Message = "Done"
+                    // Add other properties if necessary
+                };
+
+            }
+            catch (Exception e)
+            {
+                // Log the exception if necessary and throw a new exception with a meaningful message
+                throw new Exception($"An error occurred while adding the commitment: {e.Message}", e);
+            }
+        }
+
     }
 }

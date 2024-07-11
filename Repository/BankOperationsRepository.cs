@@ -29,7 +29,7 @@ namespace Kallum.Service
 
             Random random = new Random();
             string accountNumber = string.Empty;
-            for (int i = 0; i < 10; i++)
+            for (double i = 0; i < 10; i++)
             {
                 accountNumber += random.Next(0, 10).ToString();
 
@@ -124,7 +124,7 @@ namespace Kallum.Service
                 {
                     Currency = ba.Currency,
                     CurrencySymbol = ba.CurrencySymbol,
-                    CurrentBalance = ba.CurrentBalance ?? 0.0m,
+                    CurrentBalance = ba.CurrentBalance ?? 0.0,
                     Id = ba.Id,
                     TotalCommittment = ba.TotalCommittment,
                     LastUpdated = ba.LastUpdated
@@ -139,7 +139,7 @@ namespace Kallum.Service
                     {
                         Currency = "#",
                         CurrencySymbol = "#",
-                        CurrentBalance = 0.0m,
+                        CurrentBalance = 0.0,
                         Id = 0
 
                     };

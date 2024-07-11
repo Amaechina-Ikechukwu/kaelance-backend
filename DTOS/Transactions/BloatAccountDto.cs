@@ -12,7 +12,7 @@ namespace Kallum.DTOS.Transactions
         public string? RecieverId { get; set; }
         [Required]
 
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
 
     }
 }

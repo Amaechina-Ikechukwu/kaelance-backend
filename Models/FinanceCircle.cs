@@ -15,18 +15,18 @@ namespace Kallum.Models
         public required string Name { get; set; }
 
         // Total amount committed to this circle by friends
-        public decimal TotalAmountCommitted { get; set; }
+        public double TotalAmountCommitted { get; set; }
 
         // List of friends with name and email (limit to six)
         public List<string> Friends { get; set; } = new List<string>();
 
         // Fund withdrawal approval count
-        public int FundWithdrawalApprovalCount { get; set; }
+        public double TargetAmount { get; set; }
+        public double FundWithdrawalApprovalCount { get; set; }
+        public double TotalCommittment { get; set; }
+        public double PersonalCommittmentPercentage { get; set; }
 
-        public int PersonalCommittmentPercentage { get; set; }
-
-        public required int WithdrawalChargePercentage { get; set; }
-        public int WithdrawalLimitPercentage { get; set; }
+        public required double WithdrawalChargePercentage { get; set; }
 
         // ID of the creator of the circle
         public required string CreatorId { get; set; }
@@ -60,7 +60,7 @@ namespace Kallum.Models
         public DateTime Date { get; set; }
 
         // Amount of the transaction
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
 
         // Description of the transaction
         public required string Description { get; set; }

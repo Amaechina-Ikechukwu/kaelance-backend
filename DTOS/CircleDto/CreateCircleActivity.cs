@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kallum.Models
+namespace Kallum.DTOS.CircleDto
 {
-    public class Circle
+    public class CreateCircleActivity
     {
+
+
         public int Id { get; set; }
         public required Guid CircleId { get; set; }
         public CommitmentHistory? CommitmentHistory { get; set; }
@@ -21,7 +23,6 @@ namespace Kallum.Models
 
     public class WithdrawalAction
     {
-        public int Id { get; set; }
         public required DateTime DateTime { get; set; }
         public bool ApprovedByCreator { get; set; }
         public double ApprovalByAll { get; set; }
@@ -38,8 +39,7 @@ namespace Kallum.Models
     // Helper class for transactions
     public class CommitmentHistory
     {
-
-        public int Id { get; set; }// Unique identifier for the transaction
+        // Unique identifier for the transaction
         public required Guid TransactionId { get; set; }
 
 
@@ -52,11 +52,11 @@ namespace Kallum.Models
     }
     public class Activity
     {
-        public int Id { get; set; }
         // Unique identifier for the transaction
         public required Guid ActivityId { get; set; }
 
-
+        // Date of the transaction
+        public DateTime Date { get; set; }
 
 
         public required string BankId { get; set; }
@@ -65,11 +65,9 @@ namespace Kallum.Models
         public ActivityType ActivityType { get; set; }
 
         public required DateTime DateTime { get; set; }
-
     }
     public enum ActivityType
     {
         Commitmment, Declinement,
     }
-
 }

@@ -13,6 +13,8 @@ namespace Kallum.DTOS.Bank
 
         public string? TransactionPin { get; set; }
 
+        public string? PushNotificationToken {get;set;}
+
     }
 
 }

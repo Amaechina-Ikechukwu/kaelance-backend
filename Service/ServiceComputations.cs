@@ -20,15 +20,15 @@ namespace Kallum.Service
             _userManager = userManager;
             _context = context;
         }
-        public bool IsBalanceEnoughForCommitment(decimal? currentBalance, decimal totalCommitmentPercentage, decimal newCommitmentPercentage)
+        public bool IsBalanceEnoughForCommitment(double? currentBalance, double totalCommitmentPercentage, double newCommitmentPercentage)
         {
             if (currentBalance == null || currentBalance <= 0)
             {
                 return false;
             }
 
-            decimal totalCommitmentValue = currentBalance.Value * (totalCommitmentPercentage / 100);
-            decimal newCommitmentValue = (currentBalance.Value - totalCommitmentValue) * (newCommitmentPercentage / 100);
+            double totalCommitmentValue = currentBalance.Value * (totalCommitmentPercentage / 100);
+            double newCommitmentValue = (currentBalance.Value - totalCommitmentValue) * (newCommitmentPercentage / 100);
 
             if (newCommitmentValue < 0)
             {
@@ -36,7 +36,7 @@ namespace Kallum.Service
             }
             return newCommitmentValue <= currentBalance;
         }
-        public async Task<bool> UpdateUsersCommittments(string bankAccountId, int committment)
+        public async Task<bool> UpdateUsersCommittments(string bankAccountId, double committment)
         {
 
             var balanceInfo = await _context.BalanceDetailsData
@@ -44,7 +44,7 @@ namespace Kallum.Service
                 {
                     Currency = ba.Currency,
                     CurrencySymbol = ba.CurrencySymbol,
-                    CurrentBalance = ba.CurrentBalance ?? 0.0m,
+                    CurrentBalance = ba.CurrentBalance ?? 0.0,
                     Id = ba.Id,
                     TotalCommittment = ba.TotalCommittment,
                     LastUpdated = ba.LastUpdated

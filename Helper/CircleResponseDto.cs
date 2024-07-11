@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Kallum.Helper
 {
-    public class CreateCircleResponseDto
+    public class CircleResponseDto
     {
-        public string Message { get; set; }
+        public required string Message { get; set; }
         public Guid? CircleId { get; set; }
     }
 }
