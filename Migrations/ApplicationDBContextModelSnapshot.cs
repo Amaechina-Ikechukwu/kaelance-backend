@@ -284,6 +284,38 @@ namespace Kallum.Migrations
                     b.ToTable("FinanceCircleData");
                 });
 
+            modelBuilder.Entity("Kallum.Models.GeneralNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BankId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("SeenNotification")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TypeId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Kallum.Models.KallumLock", b =>
                 {
                     b.Property<int>("Id")
@@ -473,13 +505,13 @@ namespace Kallum.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7f67d870-e6c8-4e35-8e99-e89503cf6ff6",
+                            Id = "a08a5b38-c835-4a51-9112-f3125c068943",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "f579f4f0-2cd5-4007-b497-7450dd650c48",
+                            Id = "b3ca9016-7b14-4f8c-a822-20098cd09f1c",
                             Name = "User",
                             NormalizedName = "USER"
                         });

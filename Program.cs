@@ -86,6 +86,7 @@ builder.Services.AddScoped<IBankOperationRepository, BankOperationRepository>();
 builder.Services.AddScoped<ITransactionsRepository, TransactionRepository>();
 builder.Services.AddScoped<IFinanceCircleRepository, FinanceCircleRepository>();
 builder.Services.AddScoped<ICircleRepository, CircleRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<UserIdService>();
 builder.Services.AddScoped<ServiceComputations>();
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);

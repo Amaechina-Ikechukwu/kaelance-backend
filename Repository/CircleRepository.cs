@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kallum.Data;
+using Kallum.DTOS;
 using Kallum.DTOS.CircleDto;
+using Kallum.DTOS.Notifications;
 using Kallum.Helper;
 using Kallum.Interfaces;
 using Kallum.Mappers;
@@ -74,12 +76,23 @@ namespace Kallum.Repository
                     }
                     // Update the total commitment
                     financeCircleInfo.TotalCommittment += percentage;
+                    NotificationDto notification = new NotificationDto
+                    {
+                        DateTime = dateTime,
+                        SeenNotification = false,
+                        Title = $"{percentage}% added to {financeCircleInfo.Name}",
+                        Type = "Circle",
+                        TypeId = $"{financeCircleInfo.CircleId}",
+                        BankId = bankId
+
+                    };
+
                     _context.FinanceCircleData.Update(financeCircleInfo);
 
                     // Add the response to the CircleData
                     await _context.CircleData.AddAsync(response.ToCreateCircleActivityDto());
                     await _context.SaveChangesAsync();
-
+                    await _serviceComputations.AddNotification(bankId, notification);
                     // Return the response DTO
                     return new CircleResponseDto
                     {
@@ -182,7 +195,10 @@ namespace Kallum.Repository
             {
                 var userId = await _userIdService.GetUserId(username);
                 string bankId = await _userIdService.GetBankAccountNumber(userId);
-                if (bankId is null)
+                var creatorId = await _context.FinanceCircleData
+                                                 .Where(circle => circle.CircleId == circleId).Select(s => s.CreatorId)
+                                                 .FirstOrDefaultAsync();
+                if (bankId is null || creatorId is null)
                 {
                     return null;
                 }
@@ -215,7 +231,7 @@ namespace Kallum.Repository
                 return new CircleResponseDto
                 {
                     // Populate the properties of your response DTO as needed
-                    Message = "Done"
+                    Message = "You have requested for withdrawal. Alert others to approve"
                     // Add other properties if necessary
                 }; ;
             }
@@ -247,19 +263,46 @@ namespace Kallum.Repository
                                               .Where(circle => circle.CircleId == circleId)
                                               .FirstOrDefaultAsync();
 
+            BankAccountDto bankInfo = await _userIdService.GetBankAccountInfo(bankId);
             if (financeCircle == null)
             {
                 throw new Exception("Finance circle not found.");
+            }
+            if (financeCircle.CreatorId == bankId)
+            {
+                throw new Exception("Can not remove the creation.");
             }
 
             // Modify the friends list based on the type
             if (type == "remove")
             {
+                NotificationDto notification = new NotificationDto
+                {
+                    DateTime = DateTime.UtcNow,
+                    SeenNotification = false,
+                    Title = $"{bankInfo.KallumUser.UserName}% removed from {financeCircle.Name} finance circle",
+                    Type = "Circle",
+                    TypeId = $"{financeCircle.CircleId}",
+                    BankId = bankId
+
+                };
                 financeCircle.Friends.Remove(bankId);
+                await _serviceComputations.AddNotification(bankId, notification);
             }
             else if (type == "add")
             {
+                NotificationDto notification = new NotificationDto
+                {
+                    DateTime = DateTime.UtcNow,
+                    SeenNotification = false,
+                    Title = $"{bankInfo.KallumUser.UserName}% added to {financeCircle.Name} finance circle",
+                    Type = "Circle",
+                    TypeId = $"{financeCircle.CircleId}",
+                    BankId = bankId
+
+                };
                 financeCircle.Friends.Add(bankId);
+                await _serviceComputations.AddNotification(bankId, notification);
             }
             else
             {
@@ -291,7 +334,14 @@ namespace Kallum.Repository
                 {
                     return null;
                 }
-                bool isEligible = await _serviceComputations.UpdateUsersCommittments(bankId, percentage);
+                var financeCircle = await _context.FinanceCircleData
+               .FirstOrDefaultAsync(circle => circle.CircleId == circleId);
+
+                if (financeCircle == null)
+                {
+                    throw new InvalidCastException("Finance circle not found.");
+                }
+                bool isEligible = await _serviceComputations.UpdateUsersCommittments(bankId, percentage, financeCircle.TargetAmount);
 
                 if (isEligible)
                 {
@@ -308,6 +358,43 @@ namespace Kallum.Repository
             catch (Exception e)
             {
                 throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<CircleResponseDto?> InitiateWidthdrawl(Guid circleId, string username)
+        {
+            try
+            {
+                var userId = await _userIdService.GetUserId(username);
+                string bankId = await _userIdService.GetBankAccountNumber(userId);
+                var creatorId = await _context.FinanceCircleData
+                                                  .Where(circle => circle.CircleId == circleId).Select(s => s.CreatorId)
+                                                  .FirstOrDefaultAsync();
+                var circleInfo = await _context.CircleData
+                                               .Where(c => c.CircleId == circleId).FirstOrDefaultAsync();
+                if (circleInfo is null && creatorId is null && bankId is null)
+                {
+                    return null;
+                }
+
+
+                if (creatorId == bankId)
+                {
+                    circleInfo.WithdrawalApprovalPercentage += 1;
+                    return new CircleResponseDto
+                    {
+                        Message = "You have requested for withdrawal. Alert others to approve"
+                    };
+                }
+                else
+                {
+                    throw new InvalidCastException("You cannot initiate withdrawal");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+
             }
         }
     }

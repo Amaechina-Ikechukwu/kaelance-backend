@@ -21,6 +21,7 @@ namespace Kallum.Data
         public DbSet<FinanceCircle> FinanceCircleData { get; set; }
 
         public DbSet<Circle> CircleData { get; set; }
+        public DbSet<GeneralNotification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

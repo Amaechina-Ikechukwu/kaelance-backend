@@ -58,8 +58,48 @@ namespace Kallum.Controllers
                     return BadRequest(ModelState);
                 }
                 var userName = User.GetUsername();
+
                 CircleResponseDto result = await _circleRepository.CommitToCircle(circleId, userName, commitToCircle.Percentage);
 
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return Conflict(new CircleResponseDto { Message = e.Message });
+            }
+        }
+
+        [HttpPost("members/{circleId}")]
+        [Authorize]
+        public async Task<IActionResult> MemberAction([FromRoute] Guid circleId, [FromBody] MembersAction membersAction)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var userName = User.GetUsername();
+                var result = await _circleRepository.UpdateFriendsList(circleId, membersAction.BankId, membersAction.Type);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return Conflict(new CircleResponseDto { Message = e.Message });
+            }
+        }
+        [HttpPost("initialwithdrawal/{circleId}")]
+        [Authorize]
+        public async Task<IActionResult> InitialWithdrawal([FromRoute] Guid circleId)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var userName = User.GetUsername();
+                var result = await _circleRepository.InitiateCircleWithdrawal(userName, circleId);
                 return Ok(result);
             }
             catch (Exception e)

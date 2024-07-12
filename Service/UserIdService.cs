@@ -83,6 +83,15 @@ namespace Kallum.Service
             }
             return accountInfo.BankAccountId;
         }
+        public async Task<string?> GetBankAccountNumberWithUsername(string username)
+        {
+            var accountInfo = await _context.BankAccountsData.FirstOrDefaultAsync(user => user.AppUser.UserName == username);
+            if (accountInfo is null)
+            {
+                throw new KeyNotFoundException($"User with username '{accountInfo}' not found.");
+            }
+            return accountInfo.BankAccountId;
+        }
         public async Task<BankAccountDto?> GetBankAccountInfo(string bankAccountId)
         {
             var queryUsers = _context.BankAccountsData.AsQueryable();

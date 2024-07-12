@@ -16,5 +16,6 @@ namespace Kallum.Interfaces
         public Task<CircleResponseDto?> UpdateFriendsList(Guid circleId, string bankId, string type);
 
         public Task<CircleResponseDto?> CommitToCircle(Guid circleId, string username, double percentage);
+        public Task<CircleResponseDto?> InitiateWidthdrawl(Guid circleId, string username);
     }
 }

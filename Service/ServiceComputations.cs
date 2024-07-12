@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kallum.Data;
+using Kallum.DTOS.Notifications;
+using Kallum.Helper;
+using Kallum.Mappers;
 using Kallum.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +17,13 @@ namespace Kallum.Service
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDBContext _context;
+        private readonly UserIdService _userIdService;
 
-        public ServiceComputations(UserManager<AppUser> userManager, ApplicationDBContext context)
+        public ServiceComputations(UserManager<AppUser> userManager, ApplicationDBContext context, UserIdService userIdService)
         {
             _userManager = userManager;
             _context = context;
+            _userIdService = userIdService;
         }
         public bool IsBalanceEnoughForCommitment(double? currentBalance, double totalCommitmentPercentage, double newCommitmentPercentage)
         {
@@ -36,7 +41,7 @@ namespace Kallum.Service
             }
             return newCommitmentValue <= currentBalance;
         }
-        public async Task<bool> UpdateUsersCommittments(string bankAccountId, double committment)
+        public async Task<bool> UpdateUsersCommittments(string bankAccountId, double committment, double targetAmount)
         {
 
             var balanceInfo = await _context.BalanceDetailsData
@@ -57,10 +62,14 @@ namespace Kallum.Service
                 return false; // Balance information not found
             }
 
-            if (IsBalanceEnoughForCommitment(balanceInfo.CurrentBalance, balanceInfo.TotalCommittment, committment))
+            // Ensure CurrentBalance is not null before division
+            if (balanceInfo.CurrentBalance.HasValue && balanceInfo.CurrentBalance.Value != 0)
             {
+                var percentageAmount = committment / 100 * targetAmount;
+                double calculatedPercentage = percentageAmount / balanceInfo.CurrentBalance.Value * 100;
+
                 // Update the total commitment
-                balanceInfo.TotalCommittment += committment;
+                balanceInfo.TotalCommittment += calculatedPercentage;
 
                 // Update existing entity in the context
                 _context.Update(balanceInfo);
@@ -70,8 +79,33 @@ namespace Kallum.Service
             }
             else
             {
-                return false; // Insufficient balance for the commitment
+                // Handle the case where CurrentBalance is null or zero
+                // You might want to log an error or throw an exception here
+                return false; // Or handle the error as needed
             }
+
+
+        }
+        public async Task<bool> AddNotification(string bankId, NotificationDto notification)
+
+        {
+
+            try
+            {
+
+                if (bankId is null)
+                {
+                    return false;
+                }
+                await _context.Notifications.AddAsync(notification.ToCreateNotificationDto(bankId));
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
         }
 
 

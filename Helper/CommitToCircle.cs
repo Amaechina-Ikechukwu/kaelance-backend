@@ -9,4 +9,9 @@ namespace Kallum.Helper
     {
         public double Percentage { get; set; }
     }
+    public class MembersAction
+    {
+        public string? BankId { get; set; }
+        public string? Type { get; set; }
+    }
 }

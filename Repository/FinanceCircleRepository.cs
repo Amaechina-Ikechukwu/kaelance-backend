@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kallum.Data;
 using Kallum.DTOS.CircleDto;
 using Kallum.DTOS.FinanceCircle;
+using Kallum.DTOS.Notifications;
 using Kallum.Helper;
 using Kallum.Interfaces;
 using Kallum.Mappers;
@@ -131,15 +132,34 @@ namespace Kallum.Repository
                 circleInfo.CreatorId = userBankAccountId;
                 circleInfo.TotalCommittment += circleInfo.PersonalCommittmentPercentage;
                 circleInfo.Friends.Add(userBankAccountId);
-                bool isEligible = await _serviceComputations.UpdateUsersCommittments(circleInfo.CreatorId, circleInfo.PersonalCommittmentPercentage);
+                bool isEligible = await _serviceComputations.UpdateUsersCommittments(circleInfo.CreatorId, circleInfo.PersonalCommittmentPercentage, circleInfo.TargetAmount);
 
                 if (isEligible)
                 {
+                    List<NotificationDto> notifications = new List<NotificationDto>();
+
+                    foreach (var friendId in circleInfo.Friends)
+                    {
+                        var notification = new NotificationDto
+                        {
+                            DateTime = DateTime.UtcNow,
+                            SeenNotification = false,
+                            Title = circleInfo.CreatorId == friendId
+                                ? $"You created {circleInfo.Name} finance circle"
+                                : $"{username} added you to {circleInfo.Name} finance circle",
+                            Type = "Circle",
+                            TypeId = $"{circleInfo.CircleId}",
+                            BankId = friendId
+                        };
+
+                        await _serviceComputations.AddNotification(friendId, notification);
+                    }
 
                     var result = await AddCommitment(userBankAccountId, circleInfo.CircleId, circleInfo.PersonalCommittmentPercentage);
 
                     await _context.FinanceCircleData.AddAsync(circleInfo.ToCreateFinanceCircleDto());
                     await _context.SaveChangesAsync();
+
                     return new CircleResponseDto
                     {
                         Message = "Group Created",
@@ -235,7 +255,8 @@ namespace Kallum.Repository
                         friendInfos.Add(new FriendInformation
                         {
                             UserName = accountInfo.KallumUser.UserName,
-                            Email = accountInfo.KallumUser.Email
+                            Email = accountInfo.KallumUser.Email,
+                            UserId = bankId
                         });
                     }
                 }

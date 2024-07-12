@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kallum.Data;
+using Kallum.DTOS.Notifications;
 using Kallum.DTOS.Transactions;
 using Kallum.Helper;
 using Kallum.Models;
@@ -16,10 +17,12 @@ namespace Kallum.Repository
     {
         public readonly ApplicationDBContext _context;
         public readonly UserIdService _userIdService;
-        public TransactionRepository(ApplicationDBContext context, UserIdService userIdService)
+        public readonly ServiceComputations _serviceComputations;
+        public TransactionRepository(ApplicationDBContext context, UserIdService userIdService, ServiceComputations serviceComputations)
         {
             _context = context;
             _userIdService = userIdService;
+            _serviceComputations = serviceComputations;
         }
 
         public async Task<TransactionHistory?> BloatAccount(string reciever, double amount)
@@ -220,9 +223,19 @@ namespace Kallum.Repository
                 }
                 // Retrieve the amount from the webhook event
                 double amount = webhookEvent.Amount;
+                NotificationDto notification = new NotificationDto
+                {
+                    DateTime = DateTime.UtcNow,
+                    SeenNotification = false,
+                    Title = $"{amount} added to your kaelance balance",
+                    Type = "Transactions",
+                    TypeId = $"{webhookEvent.TxRef}",
+                    BankId = bankId
 
+                };
                 // Update the receiver's account with the specified amount
                 await UpdateReceiversAccount(bankId, amount);
+                await _serviceComputations.AddNotification(bankId, notification);
 
                 return "Account updated";
             }
