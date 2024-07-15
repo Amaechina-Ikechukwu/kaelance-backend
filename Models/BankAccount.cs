@@ -11,5 +11,10 @@ namespace Kallum.Models
         public string? AccountType { get; set; }
         public DateTime CreatedDate { get; set; }
         public string? Status { get; set; }
+
+        public static implicit operator BankAccount?(BalanceDetails? v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

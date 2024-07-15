@@ -18,12 +18,13 @@ namespace Kallum.Service
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDBContext _context;
         private readonly UserIdService _userIdService;
-
-        public ServiceComputations(UserManager<AppUser> userManager, ApplicationDBContext context, UserIdService userIdService)
+        public readonly ExpoPushNotificationService _pushNotification;
+        public ServiceComputations(UserManager<AppUser> userManager, ApplicationDBContext context, UserIdService userIdService, ExpoPushNotificationService pushNotificationService)
         {
             _userManager = userManager;
             _context = context;
             _userIdService = userIdService;
+            _pushNotification = pushNotificationService;
         }
         public bool IsBalanceEnoughForCommitment(double? currentBalance, double totalCommitmentPercentage, double newCommitmentPercentage)
         {
@@ -97,8 +98,10 @@ namespace Kallum.Service
                 {
                     return false;
                 }
+
                 await _context.Notifications.AddAsync(notification.ToCreateNotificationDto(bankId));
                 await _context.SaveChangesAsync();
+                await _pushNotification.ExpoNotification(bankId, notification.Title);
                 return true;
             }
             catch (Exception e)

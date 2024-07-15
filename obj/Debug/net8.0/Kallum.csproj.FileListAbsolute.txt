@@ -184,3 +184,4 @@ C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.C
 C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.Logging.AspNetCore.dll
 C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.RuntimeSupport.dll
 C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Amazon.Lambda.Serialization.SystemTextJson.dll
+C:\Users\amaec\OneDrive\WS\Projects\apis\Kallum\bin\Debug\net8.0\Expo.Server.SDK.dll

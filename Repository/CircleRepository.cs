@@ -258,72 +258,96 @@ namespace Kallum.Repository
 
         public async Task<CircleResponseDto?> UpdateFriendsList(Guid circleId, string bankId, string type)
         {
-            // Retrieve the specific FinanceCircle entity
-            var financeCircle = await _context.FinanceCircleData
-                                              .Where(circle => circle.CircleId == circleId)
-                                              .FirstOrDefaultAsync();
+            try
+            {
+                // Retrieve the specific FinanceCircle entity
+                var financeCircle = await _context.FinanceCircleData
+                                                  .Where(circle => circle.CircleId == circleId)
+                                                  .FirstOrDefaultAsync();
 
-            BankAccountDto bankInfo = await _userIdService.GetBankAccountInfo(bankId);
-            if (financeCircle == null)
-            {
-                throw new Exception("Finance circle not found.");
-            }
-            if (financeCircle.CreatorId == bankId)
-            {
-                throw new Exception("Can not remove the creation.");
-            }
 
-            // Modify the friends list based on the type
-            if (type == "remove")
-            {
-                NotificationDto notification = new NotificationDto
+                var bankInfo = await _userIdService.GetBankAccountInfo(bankId);
+                var balanceInfo = await _userIdService.GetBalanceDetailsWithBankId(bankId);
+
+                if (financeCircle == null)
                 {
-                    DateTime = DateTime.UtcNow,
-                    SeenNotification = false,
-                    Title = $"{bankInfo.KallumUser.UserName}% removed from {financeCircle.Name} finance circle",
-                    Type = "Circle",
-                    TypeId = $"{financeCircle.CircleId}",
-                    BankId = bankId
-
-                };
-                financeCircle.Friends.Remove(bankId);
-                await _serviceComputations.AddNotification(bankId, notification);
-            }
-            else if (type == "add")
-            {
-                NotificationDto notification = new NotificationDto
+                    throw new Exception("Finance circle not found.");
+                }
+                if (balanceInfo == null)
                 {
-                    DateTime = DateTime.UtcNow,
-                    SeenNotification = false,
-                    Title = $"{bankInfo.KallumUser.UserName}% added to {financeCircle.Name} finance circle",
-                    Type = "Circle",
-                    TypeId = $"{financeCircle.CircleId}",
-                    BankId = bankId
+                    throw new Exception("BalanceInfo not found.");
+                }
+                if (financeCircle.CreatorId == bankId)
+                {
+                    throw new Exception("Cannot remove the creator.");
+                }
 
+                // Modify the friends list based on the type
+                if (type == "remove")
+                {
+                    var notification = new NotificationDto
+                    {
+                        DateTime = DateTime.UtcNow,
+                        SeenNotification = false,
+                        Title = $"{bankInfo.KallumUser.UserName} removed from {financeCircle.Name} finance circle",
+                        Type = "Circle",
+                        TypeId = $"{financeCircle.CircleId}",
+                        BankId = bankId
+                    };
+
+                    var totalCommitmentByUser = await UserTotalCommitmentToACircle(circleId, bankId) ?? 0.0;
+                    financeCircle.TotalCommittment = financeCircle.TotalCommittment - totalCommitmentByUser;
+                    balanceInfo.TotalCommittment = balanceInfo.TotalCommittment - totalCommitmentByUser;
+
+                    financeCircle.Friends.Remove(bankId);
+                    foreach (var friend in financeCircle.Friends)
+                    {
+                        await _serviceComputations.AddNotification(friend, notification);
+                    }
+
+                }
+                else if (type == "add")
+                {
+                    var notification = new NotificationDto
+                    {
+                        DateTime = DateTime.UtcNow,
+                        SeenNotification = false,
+                        Title = $"{bankInfo.KallumUser.UserName} added to {financeCircle.Name} finance circle",
+                        Type = "Circle",
+                        TypeId = $"{financeCircle.CircleId}",
+                        BankId = bankId
+                    };
+
+                    financeCircle.Friends.Add(bankId);
+                    foreach (var friend in financeCircle.Friends)
+                    {
+                        await _serviceComputations.AddNotification(friend, notification);
+                    }
+                }
+                else
+                {
+                    throw new Exception("Invalid type specified. Use 'add' or 'remove'.");
+                }
+
+                // Save changes to the entity
+                _context.FinanceCircleData.Update(financeCircle);
+                _context.BalanceDetailsData.Update(balanceInfo);
+                await _context.SaveChangesAsync();
+
+                // Create and return the response DTO (assuming you have a way to create this DTO)
+                var responseDto = new CircleResponseDto
+                {
+                    Message = "Updated"
                 };
-                financeCircle.Friends.Add(bankId);
-                await _serviceComputations.AddNotification(bankId, notification);
+
+                return responseDto;
             }
-            else
+            catch (Exception e)
             {
-                throw new Exception("Invalid type specified. Use 'add' or 'remove'.");
+                Console.WriteLine(e.Message);
+                throw new Exception(e.Message);
             }
-
-            // Save changes to the entity
-            _context.FinanceCircleData.Update(financeCircle);
-            await _context.SaveChangesAsync();
-
-            // Create and return the response DTO (assuming you have a way to create this DTO)
-            var responseDto = new CircleResponseDto
-            {
-                // Populate the properties of your response DTO as needed
-                Message = "Updated"
-                // Add other properties if necessary
-            };
-
-            return responseDto;
         }
-
         public async Task<CircleResponseDto?> CommitToCircle(Guid circleId, string username, double percentage)
         {
             try
@@ -367,9 +391,13 @@ namespace Kallum.Repository
             {
                 var userId = await _userIdService.GetUserId(username);
                 string bankId = await _userIdService.GetBankAccountNumber(userId);
+                if (bankId == null)
+                {
+                    return null;
+                }
                 var creatorId = await _context.FinanceCircleData
-                                                  .Where(circle => circle.CircleId == circleId).Select(s => s.CreatorId)
-                                                  .FirstOrDefaultAsync();
+                                                                  .Where(circle => circle.CircleId == circleId).Select(s => s.CreatorId)
+                                                                  .FirstOrDefaultAsync();
                 var circleInfo = await _context.CircleData
                                                .Where(c => c.CircleId == circleId).FirstOrDefaultAsync();
                 if (circleInfo is null && creatorId is null && bankId is null)
@@ -397,5 +425,36 @@ namespace Kallum.Repository
 
             }
         }
+
+        private async Task<double?> UserTotalCommitmentToACircle(Guid circleId, string bankId)
+        {
+            // Fetch the circle history data from the database
+            List<Circle> history = await _context.CircleData
+                .Where(circle => circle.CircleId == circleId && circle.Activity.BankId == bankId)
+                .ToListAsync();
+
+            // If no history is found, return null
+            if (history == null || !history.Any())
+            {
+                return null;
+            }
+
+            // Initialize total commitment
+            double total = 0;
+
+            // Sum up the commitment percentages from the history
+            foreach (var circle in history)
+            {
+                if (circle.CommitmentHistory != null)
+                {
+                    total += circle.CommitmentHistory.Percentage;
+                }
+            }
+
+            // Return the total commitment
+            return total;
+        }
+
     }
+
 }

@@ -54,7 +54,7 @@ namespace Kallum.Repository
             }
 
             var financeCircles = await _context.FinanceCircleData
-                .Where(circle => circle.Friends.Contains(bankAccountId) || circle.CreatorId == bankAccountId)
+                .Where(circle => circle.Friends.Contains(bankAccountId) || circle.CreatorId == bankAccountId).OrderByDescending(date => date.CircleId)
                 .ToListAsync();
             var consoleOut = JsonConvert.SerializeObject(financeCircles, Formatting.Indented);
 

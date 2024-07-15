@@ -14,5 +14,6 @@ namespace Kallum.DTOS
         public DateTime CreatedDate { get; set; }
         public string? Status { get; set; }
         public AppUserDto? KallumUser { get; set; }
+        public string? AppUserId { get; set; }
     }
 }

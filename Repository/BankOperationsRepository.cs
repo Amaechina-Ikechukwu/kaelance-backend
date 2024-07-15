@@ -41,7 +41,25 @@ namespace Kallum.Service
         {
             try
             {
+                // Check if the user already has a bank account
+                var userBankAccountAlreadyExists = await _context.BankAccountsData
+                    .AnyAsync(user => user.AppUserId == userId);
+
+                if (userBankAccountAlreadyExists)
+                {
+                    // If the user already has a bank account, fetch and return the details
+                    var userBankAccountInfo = await _context.BankAccountsData
+                        .Where(user => user.AppUserId == userId)
+                        .Select(user => user.ToBankAccountDto())
+                        .FirstOrDefaultAsync();
+
+                    return userBankAccountInfo;
+                }
+
+                // Generate a new bank account number
                 var generatedAccountNumber = GenerateaBankAcccountNumber();
+
+                // Create a new BankAccount entity
                 var bankDetails = new BankAccount
                 {
                     AccountType = "Savings",
@@ -52,20 +70,11 @@ namespace Kallum.Service
                     Id = "kallum-" + Guid.NewGuid()
                 };
 
-                var userBankAccountAlreadyExists = await _context.BankAccountsData.AnyAsync(user => user.AppUserId == userId);
-                if (userBankAccountAlreadyExists)
-                {
-                    var userBankAccountInfo = await _context.BankAccountsData
-                        .Where(user => user.AppUserId == userId)
-                        .Select(user => user.ToBankAccountDto())
-                        .FirstOrDefaultAsync();
-
-                    return userBankAccountInfo;
-                }
-
+                // Add the new bank account to the context
                 await _context.BankAccountsData.AddAsync(bankDetails);
                 await _context.SaveChangesAsync();
 
+                // Create a DTO to return the newly created bank account details
                 var bankDetailsDto = new BankAccountDto
                 {
                     BankAccountId = generatedAccountNumber,
@@ -80,6 +89,7 @@ namespace Kallum.Service
                 throw new Exception(e.ToString());
             }
         }
+
         public async Task<List<BankAccountDto?>> FindBankUser(FinanceCircleQueryObject query)
         {
             var queryUsers = _context.BankAccountsData.AsQueryable();
@@ -127,7 +137,8 @@ namespace Kallum.Service
                     CurrentBalance = ba.CurrentBalance ?? 0.0,
                     Id = ba.Id,
                     TotalCommittment = ba.TotalCommittment,
-                    LastUpdated = ba.LastUpdated
+                    LastUpdated = ba.LastUpdated,
+                    BankAccountDetails = ba.BankAccountDetails
 
 
                 })
@@ -140,7 +151,8 @@ namespace Kallum.Service
                         Currency = "#",
                         CurrencySymbol = "#",
                         CurrentBalance = 0.0,
-                        Id = 0
+                        Id = 0,
+
 
                     };
                 }

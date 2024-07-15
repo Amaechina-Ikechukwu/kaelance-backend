@@ -106,6 +106,7 @@ namespace Kallum.Service
             var result = await queryUsers
                 .Select(user => new BankAccountDto
                 {
+                    AppUserId = user.AppUserId,
 
                     BankAccountId = user.BankAccountId,
                     KallumUser = new AppUserDto
@@ -119,6 +120,43 @@ namespace Kallum.Service
                 .FirstOrDefaultAsync();
 
             return result;
+        }
+
+        public async Task<BalanceDetails?> GetBalanceDetailsWithBankId(string bankId)
+        {
+            try
+            {
+                var bankDetailsData = await _context.BalanceDetailsData
+                .Where(ba => ba.BankAccountDetails.BankAccountId == bankId)
+                .Select(ba => new BalanceDetails
+                {
+                    Currency = ba.Currency,
+                    CurrencySymbol = ba.CurrencySymbol,
+                    CurrentBalance = ba.CurrentBalance ?? 0.0,
+                    Id = ba.Id,
+                    TotalCommittment = ba.TotalCommittment,
+                    LastUpdated = ba.LastUpdated,
+                    BankAccountDetails = ba.BankAccountDetails
+
+
+                })
+                .FirstOrDefaultAsync();
+
+                if (bankDetailsData is null)
+                {
+                    return null;
+                }
+                return bankDetailsData;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.ToString());
+            }
+
+
+
+
+
         }
 
     }

@@ -2,16 +2,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace Kallum.Data
 {
     public class ApplicationDBContext : IdentityDbContext<AppUser>
     {
-        public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
+        public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         {
-
         }
-        //will add dbset for models later
+
         public DbSet<UserAccount> UserAccountsData { get; set; }
         public DbSet<BankAccount> BankAccountsData { get; set; }
         public DbSet<UserBankAccountInformation> UserBankAccountInformationData { get; set; }
@@ -19,7 +19,6 @@ namespace Kallum.Data
         public DbSet<BalanceDetails> BalanceDetailsData { get; set; }
         public DbSet<KallumLock> KallumLockData { get; set; }
         public DbSet<FinanceCircle> FinanceCircleData { get; set; }
-
         public DbSet<Circle> CircleData { get; set; }
         public DbSet<GeneralNotification> Notifications { get; set; }
 
@@ -27,39 +26,30 @@ namespace Kallum.Data
         {
             base.OnModelCreating(builder);
 
-            //will add foreign keys later
-            // builder.Entity<Portfolio>(x => x.HasKey(p => new { p.AppUserId, p.StockId }));
-            // builder.Entity<Portfolio>().HasOne(u => u.AppUser).WithMany(u => u.Portfolios).HasForeignKey(p => p.AppUserId);
-
-            // builder.Entity<Portfolio>().HasOne(u => u.Stocks).WithMany(u => u.Portfolios).HasForeignKey(p => p.StockId);
+            // Configure GUIDs to use UUID in PostgreSQL
             builder.Entity<FinanceCircle>(entity =>
-        {
-            entity.Property(e => e.CircleId).HasColumnType("uuid");
-        });
-
-            builder.Entity<UserBankAccountInformation>(x =>
-         {
-             x.HasKey(key => new { key.AppUserId });
-         });
-
-            builder.Entity<UserBankAccountInformation>().HasOne(u => u.AppUser).WithMany(t => t.FullInformation).HasForeignKey(k => k.AppUserId);
-            // builder.Entity<BankAccount>().HasOne(u => u.AppUser).WithOne(o=>o.);
-
-            //
-            List<IdentityRole> roles = new List<IdentityRole> {
-                new  IdentityRole{
-                Name="Admin",
-                NormalizedName="ADMIN"
-                },
-            new IdentityRole
             {
-                Name="User",
-                NormalizedName="USER"
-            }
+                entity.Property(e => e.CircleId).HasColumnType("uuid");
+            });
+
+            // Composite key configuration
+            builder.Entity<UserBankAccountInformation>(entity =>
+            {
+                entity.HasKey(e => e.AppUserId);
+            });
+
+            builder.Entity<UserBankAccountInformation>()
+                .HasOne(u => u.AppUser)
+                .WithMany(t => t.FullInformation)
+                .HasForeignKey(k => k.AppUserId);
+
+            // Seed roles
+            List<IdentityRole> roles = new List<IdentityRole>
+            {
+                new IdentityRole { Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole { Name = "User", NormalizedName = "USER" }
             };
             builder.Entity<IdentityRole>().HasData(roles);
-
-
         }
     }
 }

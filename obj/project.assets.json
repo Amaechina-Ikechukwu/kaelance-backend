@@ -211,6 +211,18 @@
           "lib/netstandard1.3/DotNetEnv.dll": {}
         }
       },
+      "Expo.Server.SDK/1.0.2": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3"
+        },
+        "compile": {
+          "lib/netcoreapp2.2/Expo.Server.SDK.dll": {}
+        },
+        "runtime": {
+          "lib/netcoreapp2.2/Expo.Server.SDK.dll": {}
+        }
+      },
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
@@ -3599,6 +3611,20 @@
         "dotnetenv.3.0.0.nupkg.sha512",
         "dotnetenv.nuspec",
         "lib/netstandard1.3/DotNetEnv.dll"
+      ]
+    },
+    "Expo.Server.SDK/1.0.2": {
+      "sha512": "Dp1zvR2w5Mh9gdxXhYXVELaDjcXVPF5BmuvwjbzxBXAzqJyx0utdyPUcaCEH9CNjchG7zXcDQZ/Ox4DPObK8dQ==",
+      "type": "package",
+      "path": "expo.server.sdk/1.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "expo.server.sdk.1.0.2.nupkg.sha512",
+        "expo.server.sdk.nuspec",
+        "lib/netcoreapp2.2/Expo.Server.SDK.dll",
+        "lib/netstandard2.0/Expo.Server.SDK.dll"
       ]
     },
     "Humanizer.Core/2.14.1": {
@@ -9916,6 +9942,7 @@
     "net8.0": [
       "Amazon.Lambda.AspNetCoreServer.Hosting >= 1.7.0",
       "DotNetEnv >= 3.0.0",
+      "Expo.Server.SDK >= 1.0.2",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.0",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 8.0.0",
       "Microsoft.AspNetCore.Mvc.NewtonsoftJson >= 8.0.0",
@@ -9982,6 +10009,10 @@
           "DotNetEnv": {
             "target": "Package",
             "version": "[3.0.0, )"
+          },
+          "Expo.Server.SDK": {
+            "target": "Package",
+            "version": "[1.0.2, )"
           },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",

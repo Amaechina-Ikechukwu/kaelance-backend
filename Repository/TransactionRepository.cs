@@ -18,11 +18,13 @@ namespace Kallum.Repository
         public readonly ApplicationDBContext _context;
         public readonly UserIdService _userIdService;
         public readonly ServiceComputations _serviceComputations;
-        public TransactionRepository(ApplicationDBContext context, UserIdService userIdService, ServiceComputations serviceComputations)
+        public readonly ExpoPushNotificationService _pushNotification;
+        public TransactionRepository(ApplicationDBContext context, UserIdService userIdService, ServiceComputations serviceComputations, ExpoPushNotificationService pushNotificationService)
         {
             _context = context;
             _userIdService = userIdService;
             _serviceComputations = serviceComputations;
+            _pushNotification = pushNotificationService;
         }
 
         public async Task<TransactionHistory?> BloatAccount(string reciever, double amount)
@@ -227,14 +229,16 @@ namespace Kallum.Repository
                 {
                     DateTime = DateTime.UtcNow,
                     SeenNotification = false,
-                    Title = $"{amount} added to your kaelance balance",
+                    Title = $"{webhookEvent.Currency}{amount} added to your kaelance balance",
                     Type = "Transactions",
                     TypeId = $"{webhookEvent.TxRef}",
                     BankId = bankId
 
                 };
+
                 // Update the receiver's account with the specified amount
                 await UpdateReceiversAccount(bankId, amount);
+
                 await _serviceComputations.AddNotification(bankId, notification);
 
                 return "Account updated";

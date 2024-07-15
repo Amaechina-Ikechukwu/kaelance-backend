@@ -89,6 +89,7 @@ builder.Services.AddScoped<ICircleRepository, CircleRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<UserIdService>();
 builder.Services.AddScoped<ServiceComputations>();
+builder.Services.AddScoped<ExpoPushNotificationService>();
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
 var app = builder.Build();
 app.MapGet("/greet", () => "Hello World!");

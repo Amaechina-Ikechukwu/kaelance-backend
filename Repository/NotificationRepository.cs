@@ -34,7 +34,12 @@ namespace Kallum.Repository
             {
                 return null;
             }
-            List<NotificationDto> notifications = await _context.Notifications.Where(notification => notification.BankId == bankId).Select(info => info.ToGetNotificationDto()).ToListAsync();
+            List<NotificationDto> notifications = await _context.Notifications
+    .Where(notification => notification.BankId == bankId)
+    .OrderByDescending(notification => notification.DateTime) // Replace 'Date' with your property
+    .Select(notification => notification.ToGetNotificationDto())
+    .ToListAsync();
+
             if (notifications is null)
             {
                 return null;
